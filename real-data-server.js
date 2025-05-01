@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
+import path from 'path';
 
 // Load environment variables
 dotenv.config();
@@ -15,7 +16,7 @@ const __dirname = dirname(__filename);
 
 // Create Express app
 const app = express();
-const PORT = process.env.PORT || 3006;
+const PORT = process.env.PORT || 3001;
 
 // Get API keys from environment variables
 const OPENAI_API_KEY = process.env.VITE_OPENAI_API_KEY;
@@ -30,6 +31,79 @@ console.log('NewsAPI Key available:', !!NEWSAPI_KEY);
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the root directory
+app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Add route to serve the main HTML file
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index-standalone.html'));
+});
+
+// API status page
+app.get('/api/status', (req, res) => {
+  res.send(`
+    <html>
+      <head>
+        <title>Sales Meeting AI - API Status</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+          .container { background: #f5f5f5; border-radius: 10px; padding: 20px; }
+          h1 { color: #333; }
+          .endpoint { margin-bottom: 10px; padding: 10px; background: #eee; border-radius: 5px; }
+          .endpoint a { color: #0066cc; text-decoration: none; }
+          .endpoint a:hover { text-decoration: underline; }
+          .status { display: inline-block; width: 18px; height: 18px; border-radius: 50%; margin-right: 5px; }
+          .success { background-color: #4CAF50; }
+          .error { background-color: #F44336; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Sales Meeting AI - API Status</h1>
+          <p>Server is running on port ${PORT}</p>
+          
+          <h2>API Status:</h2>
+          <ul>
+            <li>
+              <span class="status ${OPENAI_API_KEY ? 'success' : 'error'}"></span>
+              OpenAI API: ${OPENAI_API_KEY ? 'Configured' : 'Not Configured'}
+            </li>
+            <li>
+              <span class="status ${BUILTWITH_API_KEY ? 'success' : 'error'}"></span>
+              BuiltWith API: ${BUILTWITH_API_KEY ? 'Configured' : 'Not Configured'}
+            </li>
+            <li>
+              <span class="status ${NEWSAPI_KEY ? 'success' : 'error'}"></span>
+              NewsAPI: ${NEWSAPI_KEY ? 'Configured' : 'Not Configured'}
+            </li>
+          </ul>
+          
+          <h2>Available Endpoints:</h2>
+          <div class="endpoint">
+            <strong>Test:</strong> <a href="/test" target="_blank">/test</a>
+          </div>
+          <div class="endpoint">
+            <strong>OpenAI:</strong> <code>POST /api/openai</code> (body: { "query": "company name" })
+          </div>
+          <div class="endpoint">
+            <strong>BuiltWith:</strong> <a href="/api/builtwith?domain=example.com" target="_blank">/api/builtwith?domain=example.com</a>
+          </div>
+          <div class="endpoint">
+            <strong>NewsAPI:</strong> <a href="/api/news?query=Apple" target="_blank">/api/news?query=Apple</a>
+          </div>
+          <div class="endpoint">
+            <strong>Web Scraping:</strong> <a href="/api/scrape?url=https://example.com" target="_blank">/api/scrape?url=https://example.com</a>
+          </div>
+          
+          <h2>Frontend:</h2>
+          <p>Access the frontend at: <a href="/" target="_blank">Home Page</a></p>
+        </div>
+      </body>
+    </html>
+  `);
+});
 
 // Test route
 app.get('/test', (req, res) => {
@@ -114,6 +188,97 @@ app.post('/api/openai', async (req, res) => {
     );
     
     res.json(response.data);
+  } catch (error) {
+    console.error('OpenAI API Error:', error.response?.data || error.message);
+    res.status(500).json({ 
+      error: 'Failed to get information from OpenAI',
+      message: error.message,
+      details: error.response?.data
+    });
+  }
+});
+
+// Compatibility endpoint for /api/company
+app.get('/api/company', async (req, res) => {
+  const { query } = req.query;
+  
+  if (!query) {
+    return res.status(400).json({ error: 'Query parameter is required' });
+  }
+  
+  if (!OPENAI_API_KEY) {
+    return res.status(500).json({ error: 'OpenAI API key not configured' });
+  }
+  
+  try {
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a helpful assistant that provides structured company information for sales prospecting.
+            Return your response as a JSON object with the following fields:
+            - name: Company name
+            - industry: Primary industry
+            - size: Company size (small, medium, large, enterprise)
+            - location: HQ location
+            - revenue: Annual revenue range
+            - founded: Year founded
+            - employees: Number of employees (range)
+            - description: Detailed company description (at least 2-3 paragraphs) including their business model, market position, and how they make money
+            - businessModel: 1-2 paragraphs specifically explaining how the company makes money and their revenue streams
+            - challenges: Array of 3-5 key business challenges the company is likely facing
+            - opportunities: Array of 3-5 business opportunities
+            - competitors: Array of objects with the following fields:
+              - name: Competitor company name
+              - marketShare: Estimated market share percentage
+              - strengths: String listing key strengths of this competitor
+              - weaknesses: String listing key weaknesses of this competitor
+            - tariffImpact: Object with fields:
+              - exposure: High/Medium/Low exposure to international tariffs
+              - regions: Array of affected regions (e.g., ["China", "EU", "Mexico"])
+              - impact: Brief explanation of how tariffs might impact their operations/costs
+              - mitigationStrategies: Array of 2-3 strategies they might employ to mitigate tariff impacts
+            - salesforceRecommendations: Object with fields:
+              - productFit: Array of 2-3 Salesforce products that would address their needs
+              - valueProposition: How Salesforce specifically addresses their industry challenges
+              - implementationConsiderations: Array of 2-3 key considerations for implementation
+              - roi: Brief explanation of potential ROI from Salesforce implementation
+            - discoveryQuestions: Object with fields:
+              - currentChallenges: Array of 3-4 specific questions tailored to this company's challenges
+              - goalsAndObjectives: Array of 3-4 specific questions related to this company's goals
+              - decisionProcess: Array of 3-4 specific questions about their decision-making process
+              - budgetAndResources: Array of 3-4 specific questions about budget and resources`
+          },
+          {
+            role: 'user',
+            content: `Please provide detailed information about ${query}, including company profile, market position, challenges, opportunities, competitive analysis, tariff impact analysis, and how Salesforce products would specifically address their business challenges. Be specific to this company and include real-world competitors, recent trends, and industry-specific insights.`
+          }
+        ],
+        temperature: 0.7
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    // Process the OpenAI response to match the format expected by the frontend
+    const aiResponse = response.data.choices[0].message.content;
+    let companyData;
+    
+    try {
+      companyData = JSON.parse(aiResponse);
+    } catch (error) {
+      console.error('Error parsing AI response as JSON:', error);
+      return res.status(500).json({ error: 'Failed to parse AI response', details: aiResponse });
+    }
+    
+    res.json(companyData);
   } catch (error) {
     console.error('OpenAI API Error:', error.response?.data || error.message);
     res.status(500).json({ 
@@ -212,70 +377,6 @@ app.get('/api/scrape', async (req, res) => {
       url
     });
   }
-});
-
-// Home route with API key status
-app.get('/', (req, res) => {
-  res.send(`
-    <html>
-      <head>
-        <title>Sales Meeting AI - Real Data Server</title>
-        <style>
-          body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-          .container { background: #f5f5f5; border-radius: 10px; padding: 20px; }
-          h1 { color: #333; }
-          .endpoint { margin-bottom: 10px; padding: 10px; background: #eee; border-radius: 5px; }
-          .endpoint a { color: #0066cc; text-decoration: none; }
-          .endpoint a:hover { text-decoration: underline; }
-          .status { display: inline-block; width: 18px; height: 18px; border-radius: 50%; margin-right: 5px; }
-          .success { background-color: #4CAF50; }
-          .error { background-color: #F44336; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>Sales Meeting AI - Real Data Server</h1>
-          <p>Server is running on port ${PORT}</p>
-          
-          <h2>API Status:</h2>
-          <ul>
-            <li>
-              <span class="status ${OPENAI_API_KEY ? 'success' : 'error'}"></span>
-              OpenAI API: ${OPENAI_API_KEY ? 'Configured' : 'Not Configured'}
-            </li>
-            <li>
-              <span class="status ${BUILTWITH_API_KEY ? 'success' : 'error'}"></span>
-              BuiltWith API: ${BUILTWITH_API_KEY ? 'Configured' : 'Not Configured'}
-            </li>
-            <li>
-              <span class="status ${NEWSAPI_KEY ? 'success' : 'error'}"></span>
-              NewsAPI: ${NEWSAPI_KEY ? 'Configured' : 'Not Configured'}
-            </li>
-          </ul>
-          
-          <h2>Available Endpoints:</h2>
-          <div class="endpoint">
-            <strong>Test:</strong> <a href="/test" target="_blank">/test</a>
-          </div>
-          <div class="endpoint">
-            <strong>OpenAI:</strong> <code>POST /api/openai</code> (body: { "query": "company name" })
-          </div>
-          <div class="endpoint">
-            <strong>BuiltWith:</strong> <a href="/api/builtwith?domain=example.com" target="_blank">/api/builtwith?domain=example.com</a>
-          </div>
-          <div class="endpoint">
-            <strong>NewsAPI:</strong> <a href="/api/news?query=Apple" target="_blank">/api/news?query=Apple</a>
-          </div>
-          <div class="endpoint">
-            <strong>Web Scraping:</strong> <a href="/api/scrape?url=https://example.com" target="_blank">/api/scrape?url=https://example.com</a>
-          </div>
-          
-          <h2>Frontend:</h2>
-          <p>Access the frontend at: <a href="http://localhost:5176" target="_blank">http://localhost:5176</a></p>
-        </div>
-      </body>
-    </html>
-  `);
 });
 
 // Start server
