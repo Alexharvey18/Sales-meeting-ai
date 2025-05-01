@@ -5,102 +5,375 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Meeting AI</title>
     <style>
+        :root {
+            --primary: #1a237e;
+            --primary-light: #304ffe;
+            --secondary: #4a148c;
+            --light-gray: #f5f5f5;
+            --mid-gray: #e0e0e0;
+            --dark-gray: #757575;
+            --white: #ffffff;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --error: #f44336;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             line-height: 1.6;
             margin: 0;
             padding: 0;
             color: #333;
-            background: #f7f7f7;
+            background: var(--light-gray);
         }
+        
         header {
-            background: #1a237e;
-            color: white;
+            background: var(--primary);
+            color: var(--white);
             padding: 1rem 2rem;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .logo img {
+            height: 40px;
+            margin-right: 15px;
+        }
+        
+        .version {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-left: 10px;
+        }
+        
+        nav {
+            background: var(--white);
+            border-bottom: 1px solid var(--mid-gray);
+            padding: 0 2rem;
+        }
+        
+        .tabs {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .tabs li {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tabs li.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .tabs li:hover:not(.active) {
+            border-bottom: 3px solid var(--mid-gray);
+        }
+        
         main {
             max-width: 1200px;
             margin: 2rem auto;
-            padding: 2rem;
-            background: white;
+            padding: 0 2rem;
+        }
+        
+        .tab-content {
+            background: var(--white);
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 2rem;
+            display: none;
         }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
         .search-container {
             margin: 2rem 0;
+            display: flex;
+            gap: 10px;
         }
+        
         input[type="text"] {
-            padding: 10px 15px;
-            width: 70%;
-            border: 1px solid #ddd;
+            padding: 12px 15px;
+            flex-grow: 1;
+            border: 1px solid var(--mid-gray);
             border-radius: 4px;
             font-size: 16px;
         }
+        
         button {
-            padding: 10px 20px;
-            background: #304ffe;
-            color: white;
+            padding: 12px 20px;
+            background: var(--primary-light);
+            color: var(--white);
             border: none;
             border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
             transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+        
         button:hover {
-            background: #1a237e;
+            background: var(--primary);
         }
+        
+        button i {
+            font-size: 18px;
+        }
+        
         #result {
             margin-top: 2rem;
         }
+        
         .card {
-            border: 1px solid #eee;
+            border: 1px solid var(--mid-gray);
             border-radius: 8px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
+            transition: box-shadow 0.3s;
         }
+        
+        .card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--mid-gray);
+            padding-bottom: 1rem;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        .section h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
         .loading {
             text-align: center;
+            padding: 2rem;
             font-style: italic;
-            color: #666;
+            color: var(--dark-gray);
             display: none;
         }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
         .error {
-            color: #d32f2f;
+            color: var(--error);
             padding: 1rem;
             background: #ffebee;
             border-radius: 4px;
+            margin: 1rem 0;
             display: none;
         }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .competitor-card {
+            border: 1px solid var(--mid-gray);
+            border-radius: 8px;
+            padding: 1rem;
+            background: var(--light-gray);
+        }
+        
+        .feature-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 1.5rem 0;
+        }
+        
+        .feature-box {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            width: calc(33.333% - 15px);
+            box-sizing: border-box;
+        }
+        
+        .feature-box h4 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+        
+        .tag {
+            display: inline-block;
+            background: var(--mid-gray);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .tag.high {
+            background: var(--error);
+            color: white;
+        }
+        
+        .tag.medium {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .tag.low {
+            background: var(--success);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .feature-box {
+                width: 100%;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+        }
     </style>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header>
-        <h1>Sales Meeting AI</h1>
+        <div class="logo">
+            <h1>Sales Meeting AI <span class="version">v1.0</span></h1>
+        </div>
+        <div>
+            <button id="apiStatusBtn" title="API Status">
+                <i class="fas fa-wifi"></i>
+            </button>
+        </div>
     </header>
+    
+    <nav>
+        <ul class="tabs">
+            <li class="active" data-tab="company-profile">Company Profile</li>
+            <li data-tab="sales-insights">Sales Insights</li>
+            <li data-tab="tech-stack">Tech Stack</li>
+            <li data-tab="news">News</li>
+            <li data-tab="tariff-impact">Tariff Impact</li>
+        </ul>
+    </nav>
 
     <main>
-        <h2>Company Research</h2>
-        <p>Enter a company name to get detailed information, challenges, opportunities, and sales strategies.</p>
-
         <div class="search-container">
             <input type="text" id="companyInput" placeholder="Enter company name (e.g., Apple, Microsoft, Amazon)">
-            <button id="searchBtn">Search</button>
+            <button id="searchBtn">
+                <i class="fas fa-search"></i> Search
+            </button>
         </div>
-
-        <div id="loading" class="loading">Searching for company information...</div>
+        
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Analyzing company data...</p>
+        </div>
+        
         <div id="error" class="error"></div>
-        <div id="result"></div>
+        
+        <!-- Company Profile Tab -->
+        <div id="company-profile" class="tab-content active">
+            <div id="companyResult"></div>
+        </div>
+        
+        <!-- Sales Insights Tab -->
+        <div id="sales-insights" class="tab-content">
+            <div id="salesResult"></div>
+        </div>
+        
+        <!-- Tech Stack Tab -->
+        <div id="tech-stack" class="tab-content">
+            <div id="techResult"></div>
+        </div>
+        
+        <!-- News Tab -->
+        <div id="news" class="tab-content">
+            <div id="newsResult"></div>
+        </div>
+        
+        <!-- Tariff Impact Tab -->
+        <div id="tariff-impact" class="tab-content">
+            <div id="tariffResult"></div>
+        </div>
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
             const companyInput = document.getElementById('companyInput');
             const searchBtn = document.getElementById('searchBtn');
-            const resultDiv = document.getElementById('result');
+            const apiStatusBtn = document.getElementById('apiStatusBtn');
             const loadingDiv = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
-
+            const tabLinks = document.querySelectorAll('.tabs li');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Tab Switching
+            tabLinks.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    tabLinks.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // API Status Button
+            apiStatusBtn.addEventListener('click', () => {
+                window.open('/api/status', '_blank');
+            });
+            
+            // Search Events
             searchBtn.addEventListener('click', searchCompany);
             companyInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
@@ -108,6 +381,7 @@
                 }
             });
 
+            // Main search function
             function searchCompany() {
                 const query = companyInput.value.trim();
                 if (!query) {
@@ -117,7 +391,7 @@
 
                 showLoading();
                 hideError();
-                resultDiv.innerHTML = '';
+                clearResults();
 
                 fetch(`/api/company?query=${encodeURIComponent(query)}`)
                     .then(response => {
@@ -128,7 +402,7 @@
                     })
                     .then(data => {
                         hideLoading();
-                        displayResult(data);
+                        displayResults(data);
                     })
                     .catch(error => {
                         hideLoading();
@@ -137,86 +411,359 @@
                     });
             }
 
-            function displayResult(data) {
+            // Display results across all tabs
+            function displayResults(data) {
+                // Company Profile Tab
+                displayCompanyProfile(data);
+                
+                // Sales Insights Tab
+                displaySalesInsights(data);
+                
+                // Tech Stack Tab
+                displayTechStack(data);
+                
+                // News Tab - will be populated via separate API call
+                fetchNews(data.name);
+                
+                // Tariff Impact Tab
+                displayTariffImpact(data);
+            }
+            
+            // Display Company Profile
+            function displayCompanyProfile(data) {
+                const companyResult = document.getElementById('companyResult');
+                
                 let html = `
                     <div class="card">
                         <h2>${data.name}</h2>
-                        <p><strong>Industry:</strong> ${data.industry}</p>
-                        <p><strong>Size:</strong> ${data.size}</p>
-                        <p><strong>Location:</strong> ${data.location}</p>
-                        <p><strong>Revenue:</strong> ${data.revenue}</p>
-                        <p><strong>Founded:</strong> ${data.founded}</p>
-                        <p><strong>Employees:</strong> ${data.employees}</p>
-                        
-                        <h3>Description</h3>
-                        <p>${data.description}</p>
-                        
-                        <h3>Business Model</h3>
-                        <p>${data.businessModel}</p>
-                        
-                        <h3>Challenges</h3>
-                        <ul>
-                            ${data.challenges.map(challenge => `<li>${challenge}</li>`).join('')}
-                        </ul>
-                        
-                        <h3>Opportunities</h3>
-                        <ul>
-                            ${data.opportunities.map(opportunity => `<li>${opportunity}</li>`).join('')}
-                        </ul>
-                        
-                        <h3>Competitors</h3>
-                        ${data.competitors.map(competitor => `
-                            <div style="margin-bottom: 1rem;">
-                                <p><strong>${competitor.name}</strong> (Market Share: ${competitor.marketShare})</p>
-                                <p><strong>Strengths:</strong> ${competitor.strengths}</p>
-                                <p><strong>Weaknesses:</strong> ${competitor.weaknesses}</p>
+                        <div class="section">
+                            <div class="grid">
+                                <div>
+                                    <p><strong>Industry:</strong> ${data.industry}</p>
+                                    <p><strong>Size:</strong> ${data.size}</p>
+                                    <p><strong>Location:</strong> ${data.location}</p>
+                                </div>
+                                <div>
+                                    <p><strong>Revenue:</strong> ${data.revenue}</p>
+                                    <p><strong>Founded:</strong> ${data.founded}</p>
+                                    <p><strong>Employees:</strong> ${data.employees}</p>
+                                </div>
                             </div>
-                        `).join('')}
+                        </div>
                         
-                        <h3>Tariff Impact</h3>
-                        <p><strong>Exposure:</strong> ${data.tariffImpact.exposure}</p>
-                        <p><strong>Regions:</strong> ${data.tariffImpact.regions.join(', ')}</p>
-                        <p><strong>Impact:</strong> ${data.tariffImpact.impact}</p>
-                        <p><strong>Mitigation Strategies:</strong></p>
-                        <ul>
-                            ${data.tariffImpact.mitigationStrategies.map(strategy => `<li>${strategy}</li>`).join('')}
-                        </ul>
+                        <div class="section">
+                            <h3>Description</h3>
+                            <p>${data.description}</p>
+                        </div>
                         
-                        <h3>Salesforce Recommendations</h3>
-                        <p><strong>Product Fit:</strong></p>
-                        <ul>
-                            ${data.salesforceRecommendations.productFit.map(product => `<li>${product}</li>`).join('')}
-                        </ul>
-                        <p><strong>Value Proposition:</strong> ${data.salesforceRecommendations.valueProposition}</p>
-                        <p><strong>Implementation Considerations:</strong></p>
-                        <ul>
-                            ${data.salesforceRecommendations.implementationConsiderations.map(consideration => `<li>${consideration}</li>`).join('')}
-                        </ul>
-                        <p><strong>ROI:</strong> ${data.salesforceRecommendations.roi}</p>
-                        
-                        <h3>Discovery Questions</h3>
-                        <p><strong>Current Challenges:</strong></p>
-                        <ul>
-                            ${data.discoveryQuestions.currentChallenges.map(question => `<li>${question}</li>`).join('')}
-                        </ul>
-                        <p><strong>Goals and Objectives:</strong></p>
-                        <ul>
-                            ${data.discoveryQuestions.goalsAndObjectives.map(question => `<li>${question}</li>`).join('')}
-                        </ul>
-                        <p><strong>Decision Process:</strong></p>
-                        <ul>
-                            ${data.discoveryQuestions.decisionProcess.map(question => `<li>${question}</li>`).join('')}
-                        </ul>
-                        <p><strong>Budget and Resources:</strong></p>
-                        <ul>
-                            ${data.discoveryQuestions.budgetAndResources.map(question => `<li>${question}</li>`).join('')}
-                        </ul>
+                        <div class="section">
+                            <h3>Business Model</h3>
+                            <p>${data.businessModel}</p>
+                        </div>
                     </div>
                 `;
                 
-                resultDiv.innerHTML = html;
+                companyResult.innerHTML = html;
             }
-
+            
+            // Display Sales Insights
+            function displaySalesInsights(data) {
+                const salesResult = document.getElementById('salesResult');
+                
+                let html = `
+                    <div class="card">
+                        <h2>${data.name} - Sales Insights</h2>
+                        
+                        <div class="section">
+                            <h3>Challenges</h3>
+                            <ul>
+                                ${data.challenges.map(challenge => `<li>${challenge}</li>`).join('')}
+                            </ul>
+                        </div>
+                        
+                        <div class="section">
+                            <h3>Opportunities</h3>
+                            <ul>
+                                ${data.opportunities.map(opportunity => `<li>${opportunity}</li>`).join('')}
+                            </ul>
+                        </div>
+                        
+                        <div class="section">
+                            <h3>Competitors</h3>
+                            <div class="grid">
+                                ${data.competitors.map(competitor => `
+                                    <div class="competitor-card">
+                                        <h4>${competitor.name}</h4>
+                                        <p><strong>Market Share:</strong> ${competitor.marketShare}</p>
+                                        <p><strong>Strengths:</strong> ${competitor.strengths}</p>
+                                        <p><strong>Weaknesses:</strong> ${competitor.weaknesses}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3>Salesforce Recommendations</h3>
+                            <div class="feature-container">
+                                <div class="feature-box">
+                                    <h4>Product Fit</h4>
+                                    <ul>
+                                        ${data.salesforceRecommendations.productFit.map(product => `<li>${product}</li>`).join('')}
+                                    </ul>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>Value Proposition</h4>
+                                    <p>${data.salesforceRecommendations.valueProposition}</p>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>ROI</h4>
+                                    <p>${data.salesforceRecommendations.roi}</p>
+                                </div>
+                            </div>
+                            
+                            <h4>Implementation Considerations</h4>
+                            <ul>
+                                ${data.salesforceRecommendations.implementationConsiderations.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                        
+                        <div class="section">
+                            <h3>Discovery Questions</h3>
+                            <div class="feature-container">
+                                <div class="feature-box">
+                                    <h4>Current Challenges</h4>
+                                    <ul>
+                                        ${data.discoveryQuestions.currentChallenges.map(q => `<li>${q}</li>`).join('')}
+                                    </ul>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>Goals & Objectives</h4>
+                                    <ul>
+                                        ${data.discoveryQuestions.goalsAndObjectives.map(q => `<li>${q}</li>`).join('')}
+                                    </ul>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>Decision Process</h4>
+                                    <ul>
+                                        ${data.discoveryQuestions.decisionProcess.map(q => `<li>${q}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                salesResult.innerHTML = html;
+            }
+            
+            // Display Tech Stack
+            function displayTechStack(data) {
+                const techResult = document.getElementById('techResult');
+                
+                // For demonstration, we're using mock tech stack data
+                // In a real implementation, this would come from BuiltWith API
+                
+                techResult.innerHTML = `
+                    <div class="card">
+                        <h2>${data.name} - Technology Stack</h2>
+                        <p>Loading technology data from BuiltWith...</p>
+                        <div id="builtWithData"></div>
+                    </div>
+                `;
+                
+                // Fetch BuiltWith data
+                fetchBuiltWith(data.name);
+            }
+            
+            // Display Tariff Impact
+            function displayTariffImpact(data) {
+                const tariffResult = document.getElementById('tariffResult');
+                
+                let exposureClass = 'low';
+                if (data.tariffImpact.exposure.toLowerCase().includes('high')) {
+                    exposureClass = 'high';
+                } else if (data.tariffImpact.exposure.toLowerCase().includes('medium')) {
+                    exposureClass = 'medium';
+                }
+                
+                let html = `
+                    <div class="card">
+                        <h2>${data.name} - Tariff Impact Analysis</h2>
+                        
+                        <div class="section">
+                            <h3>Exposure Assessment</h3>
+                            <p><span class="tag ${exposureClass}">${data.tariffImpact.exposure}</span></p>
+                            <p>${data.tariffImpact.impact}</p>
+                        </div>
+                        
+                        <div class="section">
+                            <h3>Affected Regions</h3>
+                            <div>
+                                ${data.tariffImpact.regions.map(region => `<span class="tag">${region}</span>`).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3>Mitigation Strategies</h3>
+                            <ul>
+                                ${data.tariffImpact.mitigationStrategies.map(strategy => `<li>${strategy}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                tariffResult.innerHTML = html;
+            }
+            
+            // Fetch and display news data
+            function fetchNews(companyName) {
+                const newsResult = document.getElementById('newsResult');
+                
+                newsResult.innerHTML = `
+                    <div class="card">
+                        <h2>${companyName} - Latest News</h2>
+                        <p>Loading news data...</p>
+                    </div>
+                `;
+                
+                fetch(`/api/news?query=${encodeURIComponent(companyName)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('News API request failed');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        displayNewsData(companyName, data);
+                    })
+                    .catch(error => {
+                        newsResult.innerHTML = `
+                            <div class="card">
+                                <h2>${companyName} - Latest News</h2>
+                                <p>Failed to load news data. Error: ${error.message}</p>
+                            </div>
+                        `;
+                    });
+            }
+            
+            // Display news data
+            function displayNewsData(companyName, data) {
+                const newsResult = document.getElementById('newsResult');
+                
+                if (!data.articles || data.articles.length === 0) {
+                    newsResult.innerHTML = `
+                        <div class="card">
+                            <h2>${companyName} - Latest News</h2>
+                            <p>No news articles found for ${companyName}.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = `
+                    <div class="card">
+                        <h2>${companyName} - Latest News</h2>
+                        <div class="section">
+                `;
+                
+                data.articles.forEach(article => {
+                    const date = new Date(article.publishedAt).toLocaleDateString();
+                    
+                    html += `
+                        <div class="section">
+                            <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
+                            <p>${article.description}</p>
+                            <p><small>Source: ${article.source.name} - ${date}</small></p>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+                
+                newsResult.innerHTML = html;
+            }
+            
+            // Fetch and display BuiltWith data
+            function fetchBuiltWith(companyName) {
+                // Extract domain from company name - this is a simplified approach
+                let domain = companyName.toLowerCase().replace(/\s+/g, '') + '.com';
+                
+                fetch(`/api/builtwith?domain=${encodeURIComponent(domain)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('BuiltWith API request failed');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        displayBuiltWithData(domain, data);
+                    })
+                    .catch(error => {
+                        const builtWithData = document.getElementById('builtWithData');
+                        builtWithData.innerHTML = `<p>Failed to load technology data. Error: ${error.message}</p>`;
+                    });
+            }
+            
+            // Display BuiltWith data
+            function displayBuiltWithData(domain, data) {
+                const builtWithData = document.getElementById('builtWithData');
+                
+                // Mock data structure for demonstration
+                const mockTechData = {
+                    categories: [
+                        {
+                            name: "Analytics",
+                            technologies: [
+                                { name: "Google Analytics", description: "Web analytics service" },
+                                { name: "Hotjar", description: "User behavior analytics" }
+                            ]
+                        },
+                        {
+                            name: "E-Commerce",
+                            technologies: [
+                                { name: "Shopify", description: "E-commerce platform" }
+                            ]
+                        },
+                        {
+                            name: "Marketing",
+                            technologies: [
+                                { name: "HubSpot", description: "Marketing, sales, and CRM platform" },
+                                { name: "Marketo", description: "Marketing automation" }
+                            ]
+                        }
+                    ]
+                };
+                
+                let html = `
+                    <h3>Technology Stack for ${domain}</h3>
+                `;
+                
+                // Use real data if available, otherwise use mock data
+                const categories = (data && data.categories) ? data.categories : mockTechData.categories;
+                
+                categories.forEach(category => {
+                    html += `
+                        <div class="section">
+                            <h4>${category.name}</h4>
+                            <ul>
+                                ${category.technologies.map(tech => `
+                                    <li>
+                                        <strong>${tech.name}</strong>
+                                        ${tech.description ? ` - ${tech.description}` : ''}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `;
+                });
+                
+                builtWithData.innerHTML = html;
+            }
+            
+            // Utility functions
             function showLoading() {
                 loadingDiv.style.display = 'block';
             }
@@ -232,6 +779,14 @@
 
             function hideError() {
                 errorDiv.style.display = 'none';
+            }
+            
+            function clearResults() {
+                document.getElementById('companyResult').innerHTML = '';
+                document.getElementById('salesResult').innerHTML = '';
+                document.getElementById('techResult').innerHTML = '';
+                document.getElementById('newsResult').innerHTML = '';
+                document.getElementById('tariffResult').innerHTML = '';
             }
         });
     </script>
