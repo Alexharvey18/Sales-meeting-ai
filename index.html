@@ -1141,6 +1141,15 @@
                 // Battlecard Tab
                 displayBattlecard(data);
                 
+                // Meeting Prep Tab
+                displayMeetingPrep(data);
+                
+                // Sales Potential Tab 
+                displaySalesPotential(data);
+                
+                // Action Recommendations Tab
+                displayActionRecommendations(data);
+                
                 // Tech Stack Tab
                 displayTechStack(data);
                 
@@ -1574,7 +1583,7 @@
                 buyerSignalsResult.innerHTML = html;
             }
             
-            // Account Intelligence Module
+            // Display Account Intelligence
             function displayAccountIntelligence(data) {
                 const accountIntelligenceResult = document.getElementById('accountIntelligenceResult');
                 
@@ -1583,7 +1592,7 @@
                         <h2>${data.name} - Account Intelligence</h2>
                         
                         <div class="section">
-                            <h3><i class="fas fa-building"></i> Company Firmographics</h3>
+                            <h3><i class="fas fa-building"></i> Firmographics Overview</h3>
                             <div class="grid">
                                 <div class="info-item">
                                     <strong>Founded:</strong> ${data.founded}
@@ -1601,100 +1610,123 @@
                                     <strong>Industry:</strong> ${data.industry}
                                 </div>
                                 <div class="info-item">
-                                    <strong>Size:</strong> ${data.size}
+                                    <strong>Growth Rate:</strong> ${Math.floor(Math.random() * 15) + 5}% annually
                                 </div>
                             </div>
-                            
-                            <h4>Funding History</h4>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-chart-line"></i> Funding History</h3>
                             <div class="funding-timeline">
                                 <div class="funding-round">
-                                    <span class="round-date">2022</span>
+                                    <span class="round-date">2023</span>
+                                    <div class="round-details">
+                                        <h5>Series D</h5>
+                                        <p>$${(Math.floor(Math.random() * 50) + 100)}M led by Sequoia Capital</p>
+                                        <p><small>Valuation: $${(Math.floor(Math.random() * 500) + 1000)}M</small></p>
+                                    </div>
+                                </div>
+                                <div class="funding-round">
+                                    <span class="round-date">2021</span>
                                     <div class="round-details">
                                         <h5>Series C</h5>
-                                        <p>$75M led by Sequoia Capital</p>
-                                        <p><small>Valuation: $450M</small></p>
+                                        <p>$${(Math.floor(Math.random() * 30) + 50)}M led by Andreessen Horowitz</p>
+                                        <p><small>Valuation: $${(Math.floor(Math.random() * 300) + 500)}M</small></p>
                                     </div>
                                 </div>
                                 <div class="funding-round">
-                                    <span class="round-date">2020</span>
+                                    <span class="round-date">2019</span>
                                     <div class="round-details">
                                         <h5>Series B</h5>
-                                        <p>$30M led by Andreessen Horowitz</p>
-                                        <p><small>Valuation: $180M</small></p>
-                                    </div>
-                                </div>
-                                <div class="funding-round">
-                                    <span class="round-date">2018</span>
-                                    <div class="round-details">
-                                        <h5>Series A</h5>
-                                        <p>$12M led by Accel Partners</p>
-                                        <p><small>Valuation: $50M</small></p>
+                                        <p>$${(Math.floor(Math.random() * 20) + 20)}M led by Accel Partners</p>
+                                        <p><small>Valuation: $${(Math.floor(Math.random() * 150) + 150)}M</small></p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="section">
-                            <h3><i class="fas fa-sitemap"></i> Organizational Structure</h3>
+                            <h3><i class="fas fa-sitemap"></i> Key Decision Makers</h3>
                             <div class="org-chart">
                                 <div class="org-level">
                                     <div class="org-box executive">
                                         <h4>CEO</h4>
                                         <p>John Smith</p>
-                                        <p><small>Former Head of Innovation at TechCorp</small></p>
+                                        <p><small>Since 2018</small></p>
                                     </div>
                                 </div>
                                 <div class="org-level">
                                     <div class="org-box executive">
                                         <h4>CTO</h4>
                                         <p>Sarah Johnson</p>
-                                        <p><small>Previously at Amazon AWS</small></p>
+                                        <p><small>Previously at Oracle</small></p>
                                     </div>
                                     <div class="org-box executive">
                                         <h4>CFO</h4>
                                         <p>Michael Chen</p>
-                                        <p><small>10+ years financial leadership</small></p>
+                                        <p><small>10+ years in finance</small></p>
                                     </div>
                                     <div class="org-box executive">
                                         <h4>CMO</h4>
                                         <p>Jessica Williams</p>
-                                        <p><small>Former Director at Salesforce</small></p>
+                                        <p><small>Former VP at Microsoft</small></p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <h4>Recommended Decision Makers to Contact</h4>
+                            <h4>Recommended Contacts</h4>
                             <ul class="decision-makers">
-                                <li><strong>VP of Digital Transformation</strong> - Likely oversees technology investments</li>
-                                <li><strong>Director of IT Operations</strong> - Involved in cloud infrastructure decisions</li>
-                                <li><strong>Head of Sales Operations</strong> - Potential champion for CRM solutions</li>
-                                <li><strong>Chief Information Officer</strong> - Ultimate decision maker for enterprise software</li>
+                                <li><strong>VP of Digital Transformation</strong> - Responsible for technology modernization initiatives</li>
+                                <li><strong>Director of IT Infrastructure</strong> - Key stakeholder for cloud migration projects</li>
+                                <li><strong>Head of Customer Experience</strong> - Focused on improving customer journey touchpoints</li>
+                                <li><strong>Chief Strategy Officer</strong> - Oversees long-term growth initiatives</li>
                             </ul>
                         </div>
                         
                         <div class="section">
-                            <h3><i class="fas fa-code-branch"></i> Recent Tech Stack Changes</h3>
+                            <h3><i class="fas fa-project-diagram"></i> Technology Initiatives</h3>
                             <div class="tech-changes">
                                 <div class="tech-change">
-                                    <span class="change-date">Last month</span>
+                                    <span class="change-date">Current</span>
                                     <div class="change-details">
-                                        <h4>Added: Azure Cloud Services</h4>
-                                        <p>Migrating from on-premise infrastructure to cloud</p>
+                                        <h4>Cloud Transformation</h4>
+                                        <p>Migrating legacy applications to AWS and implementing microservices architecture</p>
                                     </div>
                                 </div>
                                 <div class="tech-change">
-                                    <span class="change-date">3 months ago</span>
+                                    <span class="change-date">Q2 2023</span>
                                     <div class="change-details">
-                                        <h4>Added: Segment Analytics</h4>
-                                        <p>Implementing new customer data platform</p>
+                                        <h4>AI/ML Implementation</h4>
+                                        <p>Developing predictive analytics capabilities for customer behavior modeling</p>
                                     </div>
                                 </div>
                                 <div class="tech-change">
-                                    <span class="change-date">6 months ago</span>
+                                    <span class="change-date">Q4 2022</span>
                                     <div class="change-details">
-                                        <h4>Removed: Legacy CRM System</h4>
-                                        <p>Potential opportunity for new CRM implementation</p>
+                                        <h4>DevOps Transformation</h4>
+                                        <p>Implementing CI/CD pipelines and container orchestration with Kubernetes</p>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-money-bill-wave"></i> Strategic Priorities</h3>
+                            <div class="feature-container">
+                                <div class="feature-box">
+                                    <h4>Market Expansion</h4>
+                                    <p>Entering new geographic markets in APAC and LATAM regions</p>
+                                    <p><small>Timeline: Next 12-18 months</small></p>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>Product Development</h4>
+                                    <p>Launching new AI-powered analytics platform for enterprise customers</p>
+                                    <p><small>Timeline: Q1 2024</small></p>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>Operational Efficiency</h4>
+                                    <p>Streamlining processes and reducing operational costs by 15%</p>
+                                    <p><small>Timeline: Ongoing</small></p>
                                 </div>
                             </div>
                         </div>
@@ -1802,6 +1834,305 @@
                         });
                     }
                 }, 100);
+            }
+            
+            // Display Meeting Prep
+            function displayMeetingPrep(data) {
+                const meetingPrepResult = document.getElementById('meetingPrepResult');
+                
+                let html = `
+                    <div class="card">
+                        <h2>${data.name} - Meeting Preparation</h2>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-calendar-check"></i> Recommended Agenda</h3>
+                            <ol>
+                                <li><strong>Introduction (5 min):</strong> Brief introduction and build rapport</li>
+                                <li><strong>Discovery (15 min):</strong> Understand current challenges related to ${data.challenges[0].toLowerCase()}</li>
+                                <li><strong>Solution Overview (15 min):</strong> Present tailored solutions addressing their specific needs</li>
+                                <li><strong>Value Proposition (10 min):</strong> Discuss ROI and business impact</li>
+                                <li><strong>Next Steps (5 min):</strong> Agree on action items and timeline</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-lightbulb"></i> Key Talking Points</h3>
+                            <div class="feature-container">
+                                <div class="feature-box">
+                                    <h4>Industry Trends</h4>
+                                    <ul>
+                                        <li>Digital transformation acceleration in ${data.industry}</li>
+                                        <li>Rising customer experience expectations</li>
+                                        <li>Increasing regulatory requirements</li>
+                                        <li>Competitive landscape changes</li>
+                                    </ul>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>Pain Points to Address</h4>
+                                    <ul>
+                                        <li>${data.challenges[0]}</li>
+                                        <li>${data.challenges[1]}</li>
+                                        <li>Inefficient workflow processes</li>
+                                        <li>Limited visibility into customer journeys</li>
+                                    </ul>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>Success Stories</h4>
+                                    <ul>
+                                        <li>Similar ${data.industry} company achieved 30% efficiency increase</li>
+                                        <li>Competitor improved customer satisfaction by 25%</li>
+                                        <li>Case study: 40% reduction in operational costs</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-user-tie"></i> Stakeholder Information</h3>
+                            <div class="grid">
+                                <div class="competitor-card">
+                                    <h4>Sarah Johnson - CTO</h4>
+                                    <p><strong>Background:</strong> Previously at Oracle, 15+ years in tech</p>
+                                    <p><strong>Focus:</strong> Digital transformation, cloud migration</p>
+                                    <p><strong>Communication Style:</strong> Data-driven, direct</p>
+                                </div>
+                                <div class="competitor-card">
+                                    <h4>Michael Chen - CFO</h4>
+                                    <p><strong>Background:</strong> Finance executive for 20+ years</p>
+                                    <p><strong>Focus:</strong> ROI, cost optimization</p>
+                                    <p><strong>Communication Style:</strong> Detail-oriented, analytical</p>
+                                </div>
+                                <div class="competitor-card">
+                                    <h4>Jessica Williams - VP of Sales</h4>
+                                    <p><strong>Background:</strong> Sales leadership in ${data.industry}</p>
+                                    <p><strong>Focus:</strong> Revenue growth, team efficiency</p>
+                                    <p><strong>Communication Style:</strong> Relationship-focused, big picture</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-question-circle"></i> Preparation Questions</h3>
+                            <p>Review these questions before your meeting to ensure you're fully prepared:</p>
+                            <ul>
+                                <li>What are their top 3 strategic initiatives this year?</li>
+                                <li>How is their current tech stack supporting or hindering these goals?</li>
+                                <li>What metrics do they use to measure success?</li>
+                                <li>Who else is involved in the decision-making process?</li>
+                                <li>What is their budget cycle and timeline for implementation?</li>
+                                <li>What previous solutions have they tried?</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                meetingPrepResult.innerHTML = html;
+            }
+            
+            // Display Sales Potential
+            function displaySalesPotential(data) {
+                const salesPotentialResult = document.getElementById('salesPotentialResult');
+                
+                // Calculate mock scores based on company data
+                const opportunityScore = Math.floor(Math.random() * 30) + 70; // 70-100
+                const budgetScore = Math.floor(Math.random() * 40) + 60; // 60-100
+                const timingScore = Math.floor(Math.random() * 50) + 50; // 50-100
+                const fitScore = Math.floor(Math.random() * 20) + 80; // 80-100
+                const totalScore = Math.floor((opportunityScore + budgetScore + timingScore + fitScore) / 4);
+                
+                let scoreCategory = 'Medium';
+                let scoreColor = 'var(--warning)';
+                
+                if (totalScore >= 85) {
+                    scoreCategory = 'High';
+                    scoreColor = 'var(--success)';
+                } else if (totalScore < 70) {
+                    scoreCategory = 'Low';
+                    scoreColor = 'var(--error)';
+                }
+                
+                let html = `
+                    <div class="card">
+                        <h2>${data.name} - Sales Potential</h2>
+                        
+                        <div class="section" style="text-align: center;">
+                            <h3><i class="fas fa-chart-line"></i> Overall Opportunity Score</h3>
+                            <div style="font-size: 3rem; font-weight: bold; color: ${scoreColor}; margin: 1rem 0;">${totalScore}/100</div>
+                            <div style="font-size: 1.2rem; background: rgba(0,0,0,0.05); display: inline-block; padding: 0.5rem 1.5rem; border-radius: 20px; margin-bottom: 1rem;">
+                                <strong>Category:</strong> <span style="color: ${scoreColor}">${scoreCategory} Potential</span>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-balance-scale"></i> Opportunity Factors</h3>
+                            <div class="grid">
+                                <div class="competitor-card">
+                                    <h4>Opportunity Size</h4>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin: 0.5rem 0;">${opportunityScore}/100</div>
+                                    <p>Based on company size, revenue, and growth potential</p>
+                                </div>
+                                <div class="competitor-card">
+                                    <h4>Budget Alignment</h4>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin: 0.5rem 0;">${budgetScore}/100</div>
+                                    <p>Based on financial metrics and industry spending patterns</p>
+                                </div>
+                                <div class="competitor-card">
+                                    <h4>Timing</h4>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin: 0.5rem 0;">${timingScore}/100</div>
+                                    <p>Based on fiscal year, growth initiatives, and market conditions</p>
+                                </div>
+                                <div class="competitor-card">
+                                    <h4>Solution Fit</h4>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin: 0.5rem 0;">${fitScore}/100</div>
+                                    <p>Based on alignment between challenges and solution capabilities</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-dollar-sign"></i> Deal Size Estimator</h3>
+                            <div class="feature-container">
+                                <div class="feature-box">
+                                    <h4>Estimated Initial Deal</h4>
+                                    <p style="font-size: 1.3rem; font-weight: bold; color: var(--primary);">$${(Math.floor(Math.random() * 400) + 100).toLocaleString('en-US')}k - $${(Math.floor(Math.random() * 500) + 500).toLocaleString('en-US')}k</p>
+                                    <p>Based on company size, industry benchmarks, and solution scope</p>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>Annual Recurring Value</h4>
+                                    <p style="font-size: 1.3rem; font-weight: bold; color: var(--primary);">$${(Math.floor(Math.random() * 200) + 80).toLocaleString('en-US')}k - $${(Math.floor(Math.random() * 300) + 200).toLocaleString('en-US')}k</p>
+                                    <p>Based on solution components and industry standard pricing</p>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>5-Year Customer Value</h4>
+                                    <p style="font-size: 1.3rem; font-weight: bold; color: var(--primary);">$${(Math.floor(Math.random() * 1000) + 1000).toLocaleString('en-US')}k - $${(Math.floor(Math.random() * 1500) + 2000).toLocaleString('en-US')}k</p>
+                                    <p>Including expansions, upsells, and cross-selling opportunities</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-clock"></i> Sales Cycle Prediction</h3>
+                            <p><strong>Estimated Sales Cycle:</strong> ${Math.floor(Math.random() * 3) + 3}-${Math.floor(Math.random() * 3) + 6} months</p>
+                            <div style="background: var(--light-gray); border-radius: 10px; padding: 1.2rem; margin-top: 1rem;">
+                                <h4 style="margin-top: 0; color: var(--primary);">Critical Milestones</h4>
+                                <ol style="margin-bottom: 0;">
+                                    <li><strong>Initial Discovery:</strong> 1-2 weeks</li>
+                                    <li><strong>Solution Presentation:</strong> Week 3-4</li>
+                                    <li><strong>Technical Validation:</strong> Month 2</li>
+                                    <li><strong>Stakeholder Buy-in:</strong> Month 2-3</li>
+                                    <li><strong>Procurement Process:</strong> Month 3-4</li>
+                                    <li><strong>Contract Negotiation:</strong> Month 4-5</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                salesPotentialResult.innerHTML = html;
+            }
+            
+            // Display Action Recommendations
+            function displayActionRecommendations(data) {
+                const actionRecsResult = document.getElementById('actionRecsResult');
+                
+                let html = `
+                    <div class="card">
+                        <h2>${data.name} - Action Recommendations</h2>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-tasks"></i> Next Steps</h3>
+                            <div class="feature-container">
+                                <div class="feature-box">
+                                    <h4>Immediate Actions</h4>
+                                    <ul>
+                                        <li>Schedule discovery call with ${data.name} stakeholders</li>
+                                        <li>Prepare tailored presentation addressing ${data.challenges[0].toLowerCase()}</li>
+                                        <li>Research recent ${data.name} news and announcements</li>
+                                        <li>Identify technical decision makers within their organization</li>
+                                    </ul>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>Medium-Term Actions</h4>
+                                    <ul>
+                                        <li>Conduct solution workshop with technical team</li>
+                                        <li>Develop custom ROI calculator for their use case</li>
+                                        <li>Arrange executive briefing with leadership team</li>
+                                        <li>Identify potential implementation partners</li>
+                                    </ul>
+                                </div>
+                                <div class="feature-box">
+                                    <h4>Long-Term Strategy</h4>
+                                    <ul>
+                                        <li>Develop account expansion strategy</li>
+                                        <li>Identify cross-sell opportunities across business units</li>
+                                        <li>Plan quarterly business reviews post-implementation</li>
+                                        <li>Create customer success story after deployment</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-user-friends"></i> Stakeholder Engagement Plan</h3>
+                            <div class="grid">
+                                <div class="competitor-card">
+                                    <h4>Executive Sponsors</h4>
+                                    <p><strong>Focus:</strong> ROI, strategic value, competitive advantage</p>
+                                    <p><strong>Approach:</strong> Executive briefing focused on business outcomes</p>
+                                    <p><strong>Materials:</strong> Executive summary, case studies, market trends</p>
+                                </div>
+                                <div class="competitor-card">
+                                    <h4>Technical Decision Makers</h4>
+                                    <p><strong>Focus:</strong> Integration, security, scalability, maintenance</p>
+                                    <p><strong>Approach:</strong> Technical deep dive and architecture review</p>
+                                    <p><strong>Materials:</strong> Technical white papers, solution architecture</p>
+                                </div>
+                                <div class="competitor-card">
+                                    <h4>End Users</h4>
+                                    <p><strong>Focus:</strong> Usability, productivity, workflow improvements</p>
+                                    <p><strong>Approach:</strong> Interactive demos and hands-on workshops</p>
+                                    <p><strong>Materials:</strong> Quick-start guides, feature highlights</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-calendar-alt"></i> Recommended Timeline</h3>
+                            <div style="background: var(--light-gray); border-radius: 10px; padding: 1.2rem;">
+                                <div style="display: flex; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--mid-gray);">
+                                    <div style="flex: 0 0 100px; font-weight: 500;">Week 1-2</div>
+                                    <div>
+                                        <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">Initial Engagement</h4>
+                                        <p style="margin: 0;">Discovery calls, needs assessment, stakeholder mapping</p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--mid-gray);">
+                                    <div style="flex: 0 0 100px; font-weight: 500;">Week 3-4</div>
+                                    <div>
+                                        <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">Solution Presentation</h4>
+                                        <p style="margin: 0;">Tailored demo, technical discussion, initial proposal</p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--mid-gray);">
+                                    <div style="flex: 0 0 100px; font-weight: 500;">Week 5-8</div>
+                                    <div>
+                                        <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">Evaluation Phase</h4>
+                                        <p style="margin: 0;">Proof of concept, technical validation, ROI analysis</p>
+                                    </div>
+                                </div>
+                                <div style="display: flex;">
+                                    <div style="flex: 0 0 100px; font-weight: 500;">Week 9-12</div>
+                                    <div>
+                                        <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">Procurement Process</h4>
+                                        <p style="margin: 0;">Contract negotiation, implementation planning, kickoff</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                actionRecsResult.innerHTML = html;
             }
             
             // Utility functions

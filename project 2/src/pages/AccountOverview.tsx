@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAccount } from '../contexts/AccountContext';
-import { Building, TrendingUp, Briefcase, Users, Shield, Target } from 'lucide-react';
+import { Building, TrendingUp, Briefcase, Users, Shield, Target, Newspaper, Cpu, FileText } from 'lucide-react';
 
 const AccountOverview: React.FC = () => {
   const { accountIntelligence } = useAccount();
@@ -23,6 +23,118 @@ const AccountOverview: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Recent News */}
+      {overview.recentNews && overview.recentNews.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="flex items-start mb-4">
+            <Newspaper className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0 mt-1" />
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Recent News</h3>
+            </div>
+          </div>
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {overview.recentNews.map((news, index) => (
+              <div key={index} className="py-4 first:pt-0 last:pb-0">
+                <h4 className="font-medium text-gray-900 dark:text-white">
+                  <a href={news.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                    {news.title}
+                  </a>
+                </h4>
+                <div className="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-2">
+                  <span>{news.source}</span>
+                  {news.date && (
+                    <>
+                      <span>•</span>
+                      <span>{news.date}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Technology Stack */}
+      {overview.technologyStack && overview.technologyStack.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="flex items-start mb-4">
+            <Cpu className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0 mt-1" />
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Technology Stack</h3>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+            {overview.technologyStack.map((tech, index) => (
+              <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                <h4 className="font-medium text-gray-900 dark:text-white">{tech.name}</h4>
+                <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">{tech.description || tech.categories.join(', ')}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Press Releases & Financial Documents */}
+      {((overview.pressReleases && overview.pressReleases.length > 0) || 
+        (overview.financialDocuments && overview.financialDocuments.length > 0)) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Press Releases */}
+          {overview.pressReleases && overview.pressReleases.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="flex items-start mb-4">
+                <Newspaper className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Press Releases</h3>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {overview.pressReleases.map((press, index) => (
+                  <div key={index} className="py-3 first:pt-0 last:pb-0">
+                    <a 
+                      href={press.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      {press.title}
+                    </a>
+                    {press.date && <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">{press.date}</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Financial Documents */}
+          {overview.financialDocuments && overview.financialDocuments.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="flex items-start mb-4">
+                <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Financial Documents</h3>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {overview.financialDocuments.map((doc, index) => (
+                  <div key={index} className="py-3 first:pt-0 last:pb-0">
+                    <a 
+                      href={doc.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      {doc.title}
+                    </a>
+                    <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">{doc.type}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Industry Outlook */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">

@@ -1,3 +1,32 @@
+export interface Technology {
+  name: string;
+  tag: string;
+  categories: string[];
+  description?: string;
+  link?: string;
+  firstDetected?: string;
+  lastDetected?: string;
+}
+
+export interface NewsItem {
+  title: string;
+  url: string;
+  source: string;
+  date?: string;
+}
+
+export interface PressRelease {
+  url: string;
+  title: string;
+  date?: string;
+}
+
+export interface FinancialDocument {
+  url: string;
+  title: string;
+  type: string;
+}
+
 export interface Account {
   id: string;
   name: string;
@@ -11,6 +40,12 @@ export interface Account {
     growthRate?: string;
     profitMargins?: string;
   };
+  techStack?: Technology[];
+  recentNews?: NewsItem[];
+  websiteInfo?: {
+    pressReleases: PressRelease[];
+    financialDocuments: FinancialDocument[];
+  };
 }
 
 export interface OverviewData {
@@ -21,6 +56,10 @@ export interface OverviewData {
     growthRate: string;
     profitMargins: string;
   };
+  recentNews?: NewsItem[];
+  technologyStack?: Technology[];
+  pressReleases?: PressRelease[];
+  financialDocuments?: FinancialDocument[];
   strategicInitiatives: {
     shortTerm: string[];
     midTerm: string[];

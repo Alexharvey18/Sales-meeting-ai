@@ -1,0 +1,16 @@
+{
+  "name": "sales-meeting-ai-enhanced",
+  "version": "1.0.0",
+  "description": "Enhanced features for Sales Meeting AI application",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node mock-data-server.js",
+    "test": "echo \"No tests available\" && exit 0"
+  },
+  "dependencies": {
+    "remixicon": "^3.5.0"
+  },
+  "author": "",
+  "license": "MIT"
+} 

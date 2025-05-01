@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <script src="./index-integration.js"></script>
+</head>
+<body class="p-8">
+  <h1 class="text-2xl font-bold mb-6">Sales Meeting AI Debug Page</h1>
+  
+  <div class="mb-6">
+    <input type="text" id="company-search" placeholder="Enter company name" class="p-2 border rounded w-64">
+    <button id="search-button" class="bg-indigo-600 text-white px-4 py-2 rounded ml-2">Search</button>
+  </div>
+  
+  <div class="mb-6">
+    <h2 class="text-xl font-bold mb-2">Console Output</h2>
+    <div id="console-output" class="bg-gray-100 p-4 rounded h-40 overflow-auto font-mono"></div>
+    <button id="clear-console" class="bg-gray-600 text-white px-4 py-1 rounded mt-2 text-sm">Clear Console</button>
+  </div>
+  
+  <div class="mb-6">
+    <h2 class="text-xl font-bold mb-2">Module Loading Test</h2>
+    <button id="test-loading" class="bg-green-600 text-white px-4 py-2 rounded">Test Module Loading</button>
+    <div id="loading-results" class="mt-2"></div>
+  </div>
+  
+  <div class="mb-6">
+    <h2 class="text-xl font-bold mb-2">API Test</h2>
+    <button id="test-api" class="bg-blue-600 text-white px-4 py-2 rounded">Test API Endpoint</button>
+    <div id="api-results" class="mt-2 whitespace-pre-wrap font-mono text-sm"></div>
+  </div>
+  
+  <div>
+    <h2 class="text-xl font-bold mb-2">Module Tabs</h2>
+    <div class="tabs border-b">
+      <div class="tab" data-tab="overview">Overview</div>
+      <div class="tab" data-tab="buyer-signals">Buyer Signals</div>
+      <div class="tab" data-tab="account-intelligence">Account Intelligence</div>
+      <div class="tab" data-tab="battlecard">Battlecard</div>
+      <div class="tab" data-tab="meeting-prep">Meeting Prep</div>
+      <div class="tab" data-tab="sales-potential">Sales Potential</div>
+      <div class="tab" data-tab="action-recommendations">Recommendations</div>
+    </div>
+    
+    <div id="overview-tab" class="tab-content p-4 border rounded border-t-0">Overview content will appear here</div>
+    <div id="buyer-signals-tab" class="tab-content p-4 border rounded border-t-0 hidden">Buyer Signals content will appear here</div>
+    <div id="account-intelligence-tab" class="tab-content p-4 border rounded border-t-0 hidden">Account Intelligence content will appear here</div>
+    <div id="battlecard-tab" class="tab-content p-4 border rounded border-t-0 hidden">Battlecard content will appear here</div>
+    <div id="meeting-prep-tab" class="tab-content p-4 border rounded border-t-0 hidden">Meeting Prep content will appear here</div>
+    <div id="sales-potential-tab" class="tab-content p-4 border rounded border-t-0 hidden">Sales Potential content will appear here</div>
+    <div id="action-recommendations-tab" class="tab-content p-4 border rounded border-t-0 hidden">Recommendations content will appear here</div>
+  </div>
+
+  <script>
+    // Override console.log and console.error to display in our console element
+    const consoleOutput = document.getElementById('console-output');
+    const originalLog = console.log;
+    const originalError = console.error;
+    
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+      consoleOutput.innerHTML += `<div class="text-green-600">[LOG] ${message}</div>`;
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    };
+    
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+      consoleOutput.innerHTML += `<div class="text-red-600">[ERROR] ${message}</div>`;
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    };
+    
+    // Clear console
+    document.getElementById('clear-console').addEventListener('click', () => {
+      consoleOutput.innerHTML = '';
+    });
+    
+    // Test module loading
+    document.getElementById('test-loading').addEventListener('click', async () => {
+      const loadingResults = document.getElementById('loading-results');
+      loadingResults.innerHTML = '<div class="text-blue-600">Testing module loading...</div>';
+      
+      try {
+        // Test importing all modules
+        const modules = [
+          './buyer-signals-module.js',
+          './account-intelligence-module.js',
+          './battlecard-generator.js',
+          './meeting-prep-toolkit.js',
+          './sales-potential-score.js',
+          './action-recommendations.js',
+          './sales-modules-integration.js',
+          './index.js'
+        ];
+        
+        const results = [];
+        
+        for (const modulePath of modules) {
+          try {
+            // Use dynamic import to test if module loads correctly
+            const moduleImport = await import(modulePath);
+            results.push(`✅ ${modulePath} loaded successfully`);
+          } catch (error) {
+            results.push(`❌ ${modulePath} failed to load: ${error.message}`);
+          }
+        }
+        
+        loadingResults.innerHTML = results.map(result => 
+          `<div class="${result.startsWith('✅') ? 'text-green-600' : 'text-red-600'}">${result}</div>`
+        ).join('');
+      } catch (error) {
+        loadingResults.innerHTML = `<div class="text-red-600">Error testing modules: ${error.message}</div>`;
+      }
+    });
+    
+    // Test API
+    document.getElementById('test-api').addEventListener('click', async () => {
+      const apiResults = document.getElementById('api-results');
+      apiResults.innerHTML = 'Testing API...';
+      
+      try {
+        // Test company API endpoint
+        const response = await fetch('/api/company?name=TestCompany');
+        if (!response.ok) {
+          throw new Error(`API returned status ${response.status}`);
+        }
+        
+        const data = await response.json();
+        apiResults.innerHTML = `API Response:\n${JSON.stringify(data, null, 2)}`;
+      } catch (error) {
+        apiResults.innerHTML = `API Test Error: ${error.message}\n\nTrying mock server endpoint (http://localhost:3001)...\n`;
+        
+        try {
+          // Try direct mock server URL
+          const mockResponse = await fetch('http://localhost:3001/company?name=TestCompany');
+          const mockData = await mockResponse.json();
+          apiResults.innerHTML += `\nMock Server Response:\n${JSON.stringify(mockData, null, 2)}`;
+        } catch (mockError) {
+          apiResults.innerHTML += `\nMock Server Error: ${mockError.message}`;
+        }
+      }
+    });
+    
+    // Setup tab navigation
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('bg-indigo-600', 'text-white'));
+        
+        // Hide all tab content
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+        
+        // Activate clicked tab
+        this.classList.add('bg-indigo-600', 'text-white');
+        
+        // Show corresponding content
+        const tabId = this.getAttribute('data-tab');
+        const tabContent = document.getElementById(`${tabId}-tab`);
+        if (tabContent) {
+          tabContent.classList.remove('hidden');
+        }
+      });
+    });
+    
+    // Set first tab as active
+    document.querySelector('.tab').click();
+    
+    // Handle search button click
+    document.getElementById('search-button').addEventListener('click', async () => {
+      const companyName = document.getElementById('company-search').value.trim();
+      
+      if (companyName) {
+        console.log(`Searching for company: ${companyName}`);
+        
+        try {
+          // Try to fetch company data
+          const response = await fetch(`/api/company?name=${encodeURIComponent(companyName)}`);
+          
+          if (!response.ok) {
+            throw new Error(`API returned status ${response.status}`);
+          }
+          
+          const companyData = await response.json();
+          console.log('Company data:', companyData);
+          
+          // Dispatch custom event that sales modules integration listens for
+          const event = new CustomEvent('company-selected', {
+            detail: { companyName, companyData }
+          });
+          
+          document.dispatchEvent(event);
+        } catch (error) {
+          console.error('Error loading company data:', error.message);
+          
+          // Try mock server directly as fallback
+          try {
+            const mockResponse = await fetch(`http://localhost:3001/company?name=${encodeURIComponent(companyName)}`);
+            const mockData = await mockResponse.json();
+            console.log('Mock data:', mockData);
+            
+            // Dispatch custom event with mock data
+            const event = new CustomEvent('company-selected', {
+              detail: { companyName, companyData: mockData }
+            });
+            
+            document.dispatchEvent(event);
+          } catch (mockError) {
+            console.error('Error loading mock data:', mockError.message);
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html> 

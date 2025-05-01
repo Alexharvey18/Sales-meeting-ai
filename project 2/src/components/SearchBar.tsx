@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, X, Link as LinkIcon } from 'lucide-react';
+import { Search, Filter, X, Link as LinkIcon, Info } from 'lucide-react';
 import { useAccount } from '../contexts/AccountContext';
 
 const SearchBar: React.FC = () => {
@@ -17,27 +17,33 @@ const SearchBar: React.FC = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [urlInput, setUrlInput] = useState('');
   const [showUrlInput, setShowUrlInput] = useState(false);
+  const [showUrlTooltip, setShowUrlTooltip] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
     
     // Basic URL validation
-    if (urlInput && !isValidUrl(urlInput)) {
-      alert('Please enter a valid URL');
-      return;
-    }
+    const processedUrl = prepareUrl(urlInput);
     
-    searchAccount(searchQuery, urlInput);
+    searchAccount(searchQuery, processedUrl);
     setShowHistory(false);
   };
 
-  const isValidUrl = (url: string): boolean => {
+  const prepareUrl = (url: string): string => {
+    if (!url.trim()) return '';
+    
+    // Add https:// if missing
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+    
     try {
       new URL(url);
-      return true;
+      return url;
     } catch {
-      return false;
+      alert('Please enter a valid URL');
+      return '';
     }
   };
 
@@ -72,13 +78,26 @@ const SearchBar: React.FC = () => {
             placeholder="Enter company name..."
           />
           
-          <button
-            type="button"
-            onClick={toggleUrlInput}
-            className="absolute right-24 inset-y-0 flex items-center px-3 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
-          >
-            <LinkIcon className="h-5 w-5" />
-          </button>
+          <div className="absolute right-24 inset-y-0 flex items-center">
+            <button
+              type="button"
+              onClick={toggleUrlInput}
+              onMouseEnter={() => setShowUrlTooltip(true)}
+              onMouseLeave={() => setShowUrlTooltip(false)}
+              className={`flex items-center px-3 rounded-md ${showUrlInput ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'}`}
+            >
+              <LinkIcon className="h-5 w-5" />
+            </button>
+            
+            {showUrlTooltip && (
+              <div className="absolute right-0 bottom-12 w-64 bg-gray-900 text-white text-sm rounded-md shadow-lg p-2 z-10 animate-fadeIn">
+                Add website URL to enhance analysis with data from the company website, tech stack, and news.
+                <div className="absolute inset-x-0 bottom-0 h-2 flex justify-center">
+                  <div className="w-3 h-3 -mb-1.5 rotate-45 bg-gray-900"></div>
+                </div>
+              </div>
+            )}
+          </div>
 
           <button
             type="button"
@@ -102,14 +121,23 @@ const SearchBar: React.FC = () => {
         </div>
 
         {showUrlInput && (
-          <div className="animate-fadeIn">
+          <div className="animate-fadeIn relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <LinkIcon className="h-5 w-5 text-gray-400" />
+            </div>
             <input
-              type="url"
+              type="text"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
-              className="block w-full px-4 py-3 border border-gray-200/50 dark:border-gray-700/50 rounded-lg bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-              placeholder="Enter company URL or LinkedIn profile..."
+              className="block w-full pl-10 pr-4 py-3 border border-gray-200/50 dark:border-gray-700/50 rounded-lg bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              placeholder="Enter company website URL (e.g. company.com)"
             />
+            <div className="absolute right-3 inset-y-0 flex items-center">
+              <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                <Info className="h-3 w-3 mr-1" />
+                Enhance with web data
+              </div>
+            </div>
           </div>
         )}
 

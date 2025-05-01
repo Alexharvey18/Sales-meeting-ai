@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Meeting AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #10b981;
+            --secondary-dark: #059669;
+            --bg-light: #f9fafb;
+            --text-dark: #111827;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --border-light: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.5;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+        }
+        
+        /* Card styling */
+        .card {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease-in-out;
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* Tab styling */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-light);
+            gap: 4px;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            color: var(--text-medium);
+        }
+        
+        .tab:hover {
+            color: var(--primary);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Table styling */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .info-table th {
+            text-align: left;
+            padding: 12px;
+            background-color: var(--bg-light);
+            font-weight: 500;
+            color: var(--text-medium);
+        }
+        
+        .info-table td {
+            padding: 12px;
+            border-top: 1px solid var(--border-light);
+        }
+        
+        /* Badge styling */
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.65em;
+            font-size: 75%;
+            font-weight: 500;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 9999px;
+        }
+        
+        .badge-blue {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .badge-green {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-red {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .badge-yellow {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        /* Custom button styling */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: 1px solid var(--primary-dark);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        /* Custom search input styling */
+        .search-container {
+            position: relative;
+            display: flex;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+        }
+        
+        .search-input {
+            flex: 1;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .search-button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 1.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .search-button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="ri-line-chart-line text-indigo-600 text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-900">Sales Meeting AI</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="btn btn-primary">
+                    <i class="ri-user-line mr-1"></i> Login
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Search Bar -->
+        <div class="px-4 sm:px-0 mb-8">
+            <div class="search-container">
+                <input type="text" id="company-search" placeholder="Search for a company (e.g., Apple, Microsoft)" 
+                       class="search-input" />
+                <button id="search-button" class="search-button">
+                    <i class="ri-search-line"></i> Search
+                </button>
+            </div>
+            <div id="loader" class="hidden flex justify-center mt-4">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-700"></div>
+            </div>
+        </div>
+        
+        <!-- Dashboard -->
+        <div class="px-4 sm:px-0">
+            <div id="dashboard" class="hidden">
+                <!-- Company Header -->
+                <div class="card p-6 mb-6 border-l-4 border-indigo-500">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                        <div>
+                            <h2 id="company-name" class="text-2xl font-bold text-gray-900">Acme Corporation</h2>
+                            <p id="company-info" class="text-sm text-gray-600 mt-1">Technology | Enterprise | Global</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="company-revenue" class="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">$500M - $1B</span>
+                            <button class="btn btn-primary text-sm">
+                                <i class="ri-download-line mr-1"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <div class="tabs">
+                    <div class="tab active flex items-center gap-1.5" data-tab="overview">
+                        <i class="ri-dashboard-line"></i> Overview
+                    </div>
+                    <div class="tab flex items-center gap-1.5" data-tab="discovery">
+                        <i class="ri-question-line"></i> Discovery Questions
+                    </div>
+                    <div class="tab flex items-center gap-1.5" data-tab="competitors">
+                        <i class="ri-bar-chart-horizontal-line"></i> Competitive Analysis
+                    </div>
+                    <div class="tab flex items-center gap-1.5" data-tab="financials">
+                        <i class="ri-money-dollar-circle-line"></i> Financials
+                    </div>
+                    <div class="tab flex items-center gap-1.5" data-tab="tariffs">
+                        <i class="ri-global-line"></i> Tariff Impact
+                    </div>
+                    <div class="tab flex items-center gap-1.5" data-tab="salesforce">
+                        <i class="ri-cloud-line"></i> Salesforce Solutions
+                    </div>
+                    <div class="tab flex items-center gap-1.5" data-tab="meeting">
+                        <i class="ri-calendar-check-line"></i> Meeting Prep
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="overview-tab" class="tab-content active">
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                        <!-- Company Overview Card -->
+                        <div class="card p-6 col-span-1 lg:col-span-2">
+                            <div class="mb-6">
+                                <h3 class="text-lg font-medium text-gray-900 flex items-center gap-2">
+                                    <i class="ri-information-line text-indigo-500"></i> Overview
+                                </h3>
+                                <p id="company-description" class="mt-3 text-gray-600">
+                                    Acme Corporation is a global leader in innovative technology solutions. They specialize in cloud computing, AI, and enterprise software applications.
+                                </p>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h3 class="text-lg font-medium text-gray-900 flex items-center gap-2">
+                                    <i class="ri-money-dollar-circle-line text-green-500"></i> Business Model
+                                </h3>
+                                <p id="company-business-model" class="mt-3 text-gray-600">
+                                    Acme Corporation generates revenue through SaaS subscriptions, professional services, and enterprise licensing agreements.
+                                </p>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900 flex items-center gap-2">
+                                        <i class="ri-error-warning-line text-amber-500"></i> Key Challenges
+                                    </h3>
+                                    <ul id="company-challenges" class="mt-3 space-y-2">
+                                        <li class="flex items-start">
+                                            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-amber-100 text-amber-600 mr-2 flex-shrink-0">
+                                                <i class="ri-arrow-right-line text-sm"></i>
+                                            </span>
+                                            <span class="text-gray-600">Digital transformation initiatives</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900 flex items-center gap-2">
+                                        <i class="ri-lightbulb-line text-emerald-500"></i> Opportunities
+                                    </h3>
+                                    <ul id="company-opportunities" class="mt-3 space-y-2">
+                                        <li class="flex items-start">
+                                            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-100 text-emerald-600 mr-2 flex-shrink-0">
+                                                <i class="ri-arrow-right-line text-sm"></i>
+                                            </span>
+                                            <span class="text-gray-600">Cloud infrastructure expansion</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Technology Stack Card -->
+                        <div class="card p-6">
+                            <h3 class="text-lg font-medium text-gray-900 flex items-center gap-2 mb-4">
+                                <i class="ri-stack-line text-indigo-500"></i> Technology Stack
+                            </h3>
+                            <div id="tech-stack" class="space-y-4">
+                                <div class="flex items-start p-3 rounded-lg border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-md bg-blue-50 flex items-center justify-center">
+                                        <i class="ri-reactjs-line text-blue-600 text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-sm font-medium text-gray-900">React</h4>
+                                        <p class="text-xs text-gray-500">JavaScript Frameworks</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start p-3 rounded-lg border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-md bg-green-50 flex items-center justify-center">
+                                        <i class="ri-database-2-line text-green-600 text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-sm font-medium text-gray-900">MongoDB</h4>
+                                        <p class="text-xs text-gray-500">Databases</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start p-3 rounded-lg border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-md bg-orange-50 flex items-center justify-center">
+                                        <i class="ri-amazon-line text-orange-600 text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-sm font-medium text-gray-900">AWS</h4>
+                                        <p class="text-xs text-gray-500">Cloud Hosting</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- News Card -->
+                    <div class="card p-6 mt-6">
+                        <h3 class="text-lg font-medium text-gray-900 flex items-center gap-2 mb-4">
+                            <i class="ri-newspaper-line text-indigo-500"></i> Recent News
+                        </h3>
+                        <div id="company-news" class="divide-y divide-gray-200">
+                            <div class="py-4">
+                                <a href="#" class="text-md font-medium text-indigo-600 hover:text-indigo-800 block">Acme Corporation Launches Revolutionary Product</a>
+                                <p class="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                                    <i class="ri-newspaper-line text-gray-400"></i>
+                                    <span class="font-medium">Tech News</span> 
+                                    <span class="mx-1">•</span> 
+                                    <i class="ri-calendar-line text-gray-400"></i>
+                                    <span>April 1, 2023</span>
+                                </p>
+                            </div>
+                            <div class="py-4">
+                                <a href="#" class="text-md font-medium text-indigo-600 hover:text-indigo-800 block">Acme Reports Strong Q1 Earnings</a>
+                                <p class="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                                    <i class="ri-newspaper-line text-gray-400"></i>
+                                    <span class="font-medium">Business Journal</span> 
+                                    <span class="mx-1">•</span> 
+                                    <i class="ri-calendar-line text-gray-400"></i>
+                                    <span>March 15, 2023</span>
+                                </p>
+                            </div>
+                            <div class="py-4">
+                                <a href="#" class="text-md font-medium text-indigo-600 hover:text-indigo-800 block">Acme Partners with Leading AI Research Lab</a>
+                                <p class="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                                    <i class="ri-newspaper-line text-gray-400"></i>
+                                    <span class="font-medium">AI Today</span> 
+                                    <span class="mx-1">•</span> 
+                                    <i class="ri-calendar-line text-gray-400"></i>
+                                    <span>February 28, 2023</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discovery Questions Tab -->
+                <div id="discovery-tab" class="tab-content">
+                    <div class="card p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Discovery Questions</h3>
+                        <div id="discovery-questions" class="space-y-4">
+                            <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                <h4 class="font-medium text-gray-900">Current Challenges</h4>
+                                <ul class="mt-2 list-disc pl-5 text-gray-600">
+                                    <li>What are the biggest challenges your team is facing with your current technology stack?</li>
+                                    <li>How are you currently addressing your digital transformation initiatives?</li>
+                                    <li>What pain points do you experience with your existing solutions?</li>
+                                </ul>
+                            </div>
+                            <div class="border-l-4 border-green-500 pl-4 py-2">
+                                <h4 class="font-medium text-gray-900">Goals and Objectives</h4>
+                                <ul class="mt-2 list-disc pl-5 text-gray-600">
+                                    <li>What are your key business objectives for the next 12-18 months?</li>
+                                    <li>How do you measure success for technology implementations?</li>
+                                    <li>What specific outcomes are you hoping to achieve?</li>
+                                </ul>
+                            </div>
+                            <div class="border-l-4 border-yellow-500 pl-4 py-2">
+                                <h4 class="font-medium text-gray-900">Decision Process</h4>
+                                <ul class="mt-2 list-disc pl-5 text-gray-600">
+                                    <li>Who are the key stakeholders involved in the decision-making process?</li>
+                                    <li>What is your typical evaluation process for new technologies?</li>
+                                    <li>What timeline are you working with for implementation?</li>
+                                </ul>
+                            </div>
+                            <div class="border-l-4 border-red-500 pl-4 py-2">
+                                <h4 class="font-medium text-gray-900">Budget and Resources</h4>
+                                <ul class="mt-2 list-disc pl-5 text-gray-600">
+                                    <li>Have you allocated budget for this initiative?</li>
+                                    <li>What internal resources would be involved in implementation?</li>
+                                    <li>Are there any budget constraints I should be aware of?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Competitive Analysis Tab -->
+                <div id="competitors-tab" class="tab-content">
+                    <div class="card p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Competitive Analysis</h3>
+                        <div id="competitors-table" class="overflow-x-auto">
+                            <table class="info-table">
+                                <thead>
+                                    <tr>
+                                        <th>Competitor</th>
+                                        <th>Market Share</th>
+                                        <th>Strengths</th>
+                                        <th>Weaknesses</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="font-medium">Competitor A</td>
+                                        <td><span class="badge badge-blue">32%</span></td>
+                                        <td>Market leader, Strong brand recognition</td>
+                                        <td>Slow innovation cycle, Higher pricing</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-medium">Competitor B</td>
+                                        <td><span class="badge badge-green">24%</span></td>
+                                        <td>Innovative features, Fast releases</td>
+                                        <td>Limited enterprise support, Smaller market reach</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-medium">Competitor C</td>
+                                        <td><span class="badge badge-yellow">18%</span></td>
+                                        <td>Competitive pricing, Strong customer service</td>
+                                        <td>Limited feature set, Regional focus</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="font-medium text-gray-900 mb-3">Competitive Positioning</h4>
+                            <p class="text-gray-600">This company is positioned as a leading innovator in its industry, competing primarily on technological advancement rather than price. Their competitive advantage lies in their proprietary technology and strong intellectual property portfolio.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financials Tab -->
+                <div id="financials-tab" class="tab-content">
+                    <div class="card p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Financial Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-3">Key Metrics</h4>
+                                <table class="info-table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="font-medium">Annual Revenue</td>
+                                            <td id="annual-revenue">$500M - $1B</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">Growth Rate</td>
+                                            <td><span class="badge badge-green">12% YoY</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">Profit Margin</td>
+                                            <td>18%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">Funding Status</td>
+                                            <td>Public (NASDAQ)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-3">Revenue Breakdown</h4>
+                                <table class="info-table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="font-medium">Products</td>
+                                            <td>65%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">Services</td>
+                                            <td>25%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-medium">Licensing</td>
+                                            <td>10%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="font-medium text-gray-900 mb-3">Fiscal Year Performance</h4>
+                            <p class="text-gray-600">The company has shown consistent growth over the past 3 fiscal years, with particularly strong performance in their services segment. Their recent strategic acquisitions have expanded their market reach and product offerings.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tariff Impact Tab -->
+                <div id="tariffs-tab" class="tab-content">
+                    <div class="card p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                            <i class="ri-global-line text-blue-500"></i> Tariff Impact Analysis
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <div class="mb-6">
+                                    <h4 class="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                        <i class="ri-radar-line text-amber-500"></i> Tariff Exposure
+                                    </h4>
+                                    <div class="flex items-center mb-4">
+                                        <div class="text-lg font-bold mr-3">
+                                            <span id="tariff-exposure" class="badge badge-yellow">Medium</span>
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            Exposure to international tariffs
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-sm font-medium text-gray-700 mb-2">Affected Regions:</h5>
+                                        <div id="affected-regions" class="flex flex-wrap gap-2">
+                                            <span class="badge badge-blue">China</span>
+                                            <span class="badge badge-blue">European Union</span>
+                                            <span class="badge badge-blue">Mexico</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                        <i class="ri-exchange-line text-indigo-500"></i> Impact Assessment
+                                    </h4>
+                                    <p id="tariff-impact" class="text-gray-600 mb-4">
+                                        The company's global supply chain exposes it to tariff fluctuations, particularly in semiconductor components from China and manufacturing operations in Mexico. Recent trade tensions have increased landed costs by approximately 8-12%, though the company has been able to mitigate some impact through inventory management.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                    <i class="ri-shield-check-line text-emerald-500"></i> Mitigation Strategies
+                                </h4>
+                                <div id="mitigation-strategies" class="space-y-3">
+                                    <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                                        <h5 class="text-emerald-800 font-medium">Supply Chain Diversification</h5>
+                                        <p class="text-sm text-emerald-700 mt-1">Expanding supplier networks across multiple countries to reduce dependency on high-tariff regions.</p>
+                                    </div>
+                                    <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                                        <h5 class="text-emerald-800 font-medium">Strategic Inventory Management</h5>
+                                        <p class="text-sm text-emerald-700 mt-1">Implementing just-in-time inventory practices while maintaining strategic reserves of critical components from high-tariff regions.</p>
+                                    </div>
+                                    <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                                        <h5 class="text-emerald-800 font-medium">Pricing Strategy Adjustment</h5>
+                                        <p class="text-sm text-emerald-700 mt-1">Selectively adjusting product pricing in affected markets to offset tariff costs while maintaining competitiveness.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                            <h4 class="font-medium text-blue-800 mb-2 flex items-center gap-2">
+                                <i class="ri-lightbulb-line"></i> Prospecting Insight
+                            </h4>
+                            <p class="text-blue-700 text-sm">
+                                The company's exposure to tariff fluctuations creates an opportunity to position solutions that improve supply chain visibility, enhance inventory management, and enable more agile response to trade policy changes. Focus on how your solutions can help them adapt rapidly to changing market conditions.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salesforce Solutions Tab -->
+                <div id="salesforce-tab" class="tab-content">
+                    <div class="card p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                            <i class="ri-cloud-line text-blue-500"></i> Salesforce Recommendations
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- Product Fit -->
+                            <div class="lg:col-span-2">
+                                <h4 class="font-medium text-gray-900 mb-4 flex items-center gap-2">
+                                    <i class="ri-puzzle-line text-indigo-500"></i> Recommended Solutions
+                                </h4>
+                                <div id="salesforce-products" class="space-y-4">
+                                    <div class="p-4 bg-white rounded-lg border border-indigo-100 shadow-sm hover:shadow-md transition-shadow">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-12 w-12 rounded-md bg-indigo-50 flex items-center justify-center">
+                                                <i class="ri-customer-service-2-line text-indigo-600 text-xl"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <h5 class="text-md font-medium text-gray-900">Sales Cloud</h5>
+                                                <p class="text-sm text-gray-600 mt-1">For optimizing the sales pipeline, improving lead management, and enhancing customer relationships.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="p-4 bg-white rounded-lg border border-indigo-100 shadow-sm hover:shadow-md transition-shadow">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-12 w-12 rounded-md bg-blue-50 flex items-center justify-center">
+                                                <i class="ri-bar-chart-box-line text-blue-600 text-xl"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <h5 class="text-md font-medium text-gray-900">Tableau CRM</h5>
+                                                <p class="text-sm text-gray-600 mt-1">For advanced analytics, reporting, and data-driven decision making across departments.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="p-4 bg-white rounded-lg border border-indigo-100 shadow-sm hover:shadow-md transition-shadow">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-12 w-12 rounded-md bg-emerald-50 flex items-center justify-center">
+                                                <i class="ri-service-line text-emerald-600 text-xl"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <h5 class="text-md font-medium text-gray-900">Service Cloud</h5>
+                                                <p class="text-sm text-gray-600 mt-1">For enhancing customer support operations and improving customer satisfaction metrics.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ROI Information -->
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-4 flex items-center gap-2">
+                                    <i class="ri-line-chart-line text-emerald-500"></i> Expected ROI
+                                </h4>
+                                <div class="p-4 bg-emerald-50 rounded-lg border border-emerald-100">
+                                    <div class="mb-3">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="text-sm font-medium text-gray-700">Sales Efficiency</span>
+                                            <span class="text-sm font-bold text-emerald-600">+24%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-emerald-500 h-2 rounded-full" style="width: 24%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="text-sm font-medium text-gray-700">Lead Conversion</span>
+                                            <span class="text-sm font-bold text-emerald-600">+18%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-emerald-500 h-2 rounded-full" style="width: 18%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="text-sm font-medium text-gray-700">Customer Satisfaction</span>
+                                            <span class="text-sm font-bold text-emerald-600">+32%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-emerald-500 h-2 rounded-full" style="width: 32%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="text-sm font-medium text-gray-700">Cost Reduction</span>
+                                            <span class="text-sm font-bold text-emerald-600">-15%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-emerald-500 h-2 rounded-full" style="width: 15%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 pt-3 border-t border-emerald-200">
+                                        <p id="salesforce-roi" class="text-sm text-emerald-700">
+                                            Based on similar implementations in the industry, Salesforce solutions typically deliver ROI within 10-14 months, with a 3-year projected return of 3.2x investment.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                <i class="ri-medal-line text-amber-500"></i> Value Proposition
+                            </h4>
+                            <p id="salesforce-value" class="text-gray-600 mb-6">
+                                Salesforce can address this company's specific challenges by centralizing customer data to improve decision-making, automating key business processes to reduce operational costs, and enhancing cross-department collaboration for better customer experiences. The integrated platform would eliminate data silos that are currently limiting their ability to adapt quickly to market changes and customer needs.
+                            </p>
+                            
+                            <h4 class="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                <i class="ri-settings-line text-gray-500"></i> Implementation Considerations
+                            </h4>
+                            <div id="implementation-considerations" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <h5 class="text-sm font-medium text-gray-900">Data Migration Strategy</h5>
+                                    <p class="text-xs text-gray-600 mt-1">Plan for cleaning and migrating legacy data from current systems with minimal disruption to operations.</p>
+                                </div>
+                                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <h5 class="text-sm font-medium text-gray-900">User Adoption Program</h5>
+                                    <p class="text-xs text-gray-600 mt-1">Create comprehensive training and change management plan to ensure high adoption rates across departments.</p>
+                                </div>
+                                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <h5 class="text-sm font-medium text-gray-900">Integration Requirements</h5>
+                                    <p class="text-xs text-gray-600 mt-1">Plan for necessary integrations with existing ERP systems and other business-critical applications.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meeting Prep Tab -->
+                <div id="meeting-tab" class="tab-content">
+                    <div class="card p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Meeting Preparation</h3>
+                        
+                        <div class="mb-6">
+                            <h4 class="font-medium text-gray-900 mb-3">Introduction & Agenda (2 mins)</h4>
+                            <p class="text-gray-600">
+                                "Thank you for taking the time to meet today. I'd like to learn more about your current business challenges and explore how our solutions might help address them. I've prepared some topics I'd like to cover, but I want to make sure we focus on what's most important to you."
+                            </p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h4 class="font-medium text-gray-900 mb-3">Value Proposition (3 mins)</h4>
+                            <p class="text-gray-600">
+                                "Our solution has helped similar companies in your industry achieve a 15-20% reduction in operational costs while improving efficiency by 30%. We specifically focus on addressing challenges like [key challenge from company information], which I understand is an area of focus for your team."
+                            </p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h4 class="font-medium text-gray-900 mb-3">Key Talking Points</h4>
+                            <ul class="mt-2 list-disc pl-5 text-gray-600">
+                                <li>Recent industry trends affecting their business</li>
+                                <li>Their current technology stack and pain points</li>
+                                <li>Specific use cases and success stories from similar companies</li>
+                                <li>Implementation timeline and resource requirements</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h4 class="font-medium text-gray-900 mb-3">Potential Objections & Responses</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="font-medium text-gray-800">"We're happy with our current solution."</p>
+                                    <p class="text-gray-600 ml-4">→ "I understand. Many of our current customers were satisfied with their previous solutions too. What I've found valuable is to conduct a brief assessment to identify any potential areas for improvement or cost savings you might not be aware of. Would that be of interest?"</p>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">"Your solution seems expensive."</p>
+                                    <p class="text-gray-600 ml-4">→ "I appreciate that concern. Rather than looking at the initial cost, our customers typically evaluate the ROI over 12-24 months. When factoring in the efficiency gains and cost savings, most see a positive return within 6-9 months. I'd be happy to walk through a customized ROI analysis for your specific situation."</p>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">"We don't have budget allocated for this."</p>
+                                    <p class="text-gray-600 ml-4">→ "I understand budget constraints can be a challenge. We offer flexible implementation options that can align with your fiscal planning. Many customers start with a smaller pilot program that requires minimal investment before scaling up. Would that approach be worth exploring?"</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-3">Next Steps & Call to Action</h4>
+                            <p class="text-gray-600">
+                                "Based on our discussion today, I'd like to propose a follow-up meeting that includes your technical team to dive deeper into the specific requirements. In the meantime, I'll send over case studies relevant to your industry and a high-level implementation roadmap. Does that sound like a reasonable next step?"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welcome Screen (initial view) -->
+            <div id="welcome-screen" class="text-center py-12">
+                <div class="mx-auto max-w-4xl">
+                    <div class="mb-8">
+                        <div class="inline-flex items-center justify-center h-20 w-20 rounded-full bg-indigo-100 text-indigo-600 mb-4">
+                            <i class="ri-customer-service-2-line text-5xl"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl mb-3">Prepare for Your Sales Meetings</h2>
+                        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                            Get AI-powered insights about companies to boost your sales conversations.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-lg border border-gray-100 p-8 mb-8">
+                        <div class="text-left mb-4">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">How it works:</h3>
+                            <ol class="space-y-4">
+                                <li class="flex items-start">
+                                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 mr-3 font-medium">1</span>
+                                    <div>
+                                        <p class="text-gray-700 font-medium">Search for any company</p>
+                                        <p class="text-gray-600 text-sm">Enter a company name in the search bar above</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 mr-3 font-medium">2</span>
+                                    <div>
+                                        <p class="text-gray-700 font-medium">Get comprehensive insights</p>
+                                        <p class="text-gray-600 text-sm">Our AI generates detailed information about the company</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 mr-3 font-medium">3</span>
+                                    <div>
+                                        <p class="text-gray-700 font-medium">Prepare for your meeting</p>
+                                        <p class="text-gray-600 text-sm">Use the tailored insights to have more effective sales conversations</p>
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 max-w-3xl mx-auto">
+                        <div class="card p-6 text-left bg-gradient-to-br from-indigo-50 to-white">
+                            <div class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 text-indigo-600 mb-4">
+                                <i class="ri-building-line text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900">Company Intelligence</h3>
+                            <p class="mt-2 text-gray-600">Get comprehensive information about the company, including key metrics, recent news, and business challenges.</p>
+                        </div>
+                        <div class="card p-6 text-left bg-gradient-to-br from-emerald-50 to-white">
+                            <div class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100 text-emerald-600 mb-4">
+                                <i class="ri-question-answer-line text-2xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900">Discovery Questions</h3>
+                            <p class="mt-2 text-gray-600">Access recommended questions, talking points, and objection handling techniques.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white mt-12">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center">
+            <div class="text-gray-500 text-sm">
+                © 2023 Sales Meeting AI. All rights reserved.
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <ul class="flex space-x-6">
+                    <li><a href="#" class="text-gray-500 hover:text-gray-700"><i class="ri-github-fill text-lg"></i></a></li>
+                    <li><a href="#" class="text-gray-500 hover:text-gray-700"><i class="ri-twitter-fill text-lg"></i></a></li>
+                    <li><a href="#" class="text-gray-500 hover:text-gray-700"><i class="ri-linkedin-box-fill text-lg"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('company-search');
+            const searchButton = document.getElementById('search-button');
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const dashboard = document.getElementById('dashboard');
+            const loader = document.getElementById('loader');
+            
+            const API_URL = 'http://localhost:3001';
+            
+            // Search functionality
+            searchButton.addEventListener('click', function() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    // Show loading indicator
+                    loader.classList.remove('hidden');
+                    
+                    // Clear any previous errors
+                    document.getElementById('error-message')?.remove();
+                    
+                    console.log(`Searching for ${query}...`);
+                    
+                    // Make actual API call to get company data
+                    fetch(`${API_URL}/api/openai`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ query: query })
+                    })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Hide loading indicator
+                        loader.classList.add('hidden');
+                        
+                        console.log('API Response:', data);
+                        
+                        // Check for errors in the response
+                        if (data.error) {
+                            showError(`OpenAI API Error: ${data.error}`);
+                            return;
+                        }
+                        
+                        // Parse the company data from the response
+                        try {
+                            let companyData;
+                            
+                            // Handle the real OpenAI API response format
+                            if (data.choices && data.choices[0] && data.choices[0].message) {
+                                console.log('Parsing message content:', data.choices[0].message.content);
+                                
+                                try {
+                                    // OpenAI returns content as a string that should be valid JSON
+                                    companyData = JSON.parse(data.choices[0].message.content);
+                                    console.log('Parsed company data:', companyData);
+                                } catch (e) {
+                                    console.error('Error parsing JSON:', e);
+                                    
+                                    // If can't parse as JSON, use the text directly for description
+                                    companyData = {
+                                        name: query,
+                                        description: data.choices[0].message.content,
+                                    };
+                                    console.log('Using text as description:', companyData);
+                                }
+                            } else {
+                                console.error('Unexpected response format:', data);
+                                throw new Error('Unexpected response format from OpenAI API');
+                            }
+                            
+                            // Update company information
+                            document.getElementById('company-name').textContent = companyData.name || query;
+                            document.getElementById('company-info').textContent = 
+                                `${companyData.industry || 'Unknown Industry'} | ${companyData.size || 'Unknown Size'} | ${companyData.location || 'Unknown Location'}`;
+                            document.getElementById('company-revenue').textContent = companyData.revenue || 'Unknown Revenue';
+                            document.getElementById('company-description').textContent = companyData.description || 
+                                'No description available.';
+                            
+                            // Process challenges - handle both string and array formats
+                            const challengesEl = document.getElementById('company-challenges');
+                            challengesEl.innerHTML = '';
+                            
+                            if (Array.isArray(companyData.challenges)) {
+                                companyData.challenges.forEach(challenge => {
+                                    const li = document.createElement('li');
+                                    li.className = 'flex items-start';
+                                    li.innerHTML = `
+                                        <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-amber-100 text-amber-600 mr-2 flex-shrink-0">
+                                            <i class="ri-arrow-right-line text-sm"></i>
+                                        </span>
+                                        <span class="text-gray-600">${challenge}</span>
+                                    `;
+                                    challengesEl.appendChild(li);
+                                });
+                            } else if (typeof companyData.challenges === 'string') {
+                                // Split the string by periods or commas if it's a string
+                                const challenges = companyData.challenges.split(/[.,]/).filter(item => item.trim().length > 0);
+                                
+                                if (challenges.length > 0) {
+                                    challenges.forEach(challenge => {
+                                        const li = document.createElement('li');
+                                        li.className = 'flex items-start';
+                                        li.innerHTML = `
+                                            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-amber-100 text-amber-600 mr-2 flex-shrink-0">
+                                                <i class="ri-arrow-right-line text-sm"></i>
+                                            </span>
+                                            <span class="text-gray-600">${challenge.trim()}</span>
+                                        `;
+                                        challengesEl.appendChild(li);
+                                    });
+                                } else {
+                                    // If no splits, use the whole string
+                                    const li = document.createElement('li');
+                                    li.className = 'flex items-start';
+                                    li.innerHTML = `
+                                        <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-amber-100 text-amber-600 mr-2 flex-shrink-0">
+                                            <i class="ri-arrow-right-line text-sm"></i>
+                                        </span>
+                                        <span class="text-gray-600">${companyData.challenges.trim()}</span>
+                                    `;
+                                    challengesEl.appendChild(li);
+                                }
+                            } else {
+                                const li = document.createElement('li');
+                                li.className = 'flex items-start';
+                                li.innerHTML = `
+                                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-amber-100 text-amber-600 mr-2 flex-shrink-0">
+                                        <i class="ri-arrow-right-line text-sm"></i>
+                                    </span>
+                                    <span class="text-gray-600">No specific challenges identified</span>
+                                `;
+                                challengesEl.appendChild(li);
+                            }
+                            
+                            // Process opportunities - handle both string and array formats
+                            const opportunitiesEl = document.getElementById('company-opportunities');
+                            opportunitiesEl.innerHTML = '';
+                            
+                            if (Array.isArray(companyData.opportunities)) {
+                                companyData.opportunities.forEach(opportunity => {
+                                    const li = document.createElement('li');
+                                    li.className = 'flex items-start';
+                                    li.innerHTML = `
+                                        <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-100 text-emerald-600 mr-2 flex-shrink-0">
+                                            <i class="ri-arrow-right-line text-sm"></i>
+                                        </span>
+                                        <span class="text-gray-600">${opportunity}</span>
+                                    `;
+                                    opportunitiesEl.appendChild(li);
+                                });
+                            } else if (typeof companyData.opportunities === 'string') {
+                                // Split the string by periods or commas if it's a string
+                                const opportunities = companyData.opportunities.split(/[.,]/).filter(item => item.trim().length > 0);
+                                
+                                if (opportunities.length > 0) {
+                                    opportunities.forEach(opportunity => {
+                                        const li = document.createElement('li');
+                                        li.className = 'flex items-start';
+                                        li.innerHTML = `
+                                            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-100 text-emerald-600 mr-2 flex-shrink-0">
+                                                <i class="ri-arrow-right-line text-sm"></i>
+                                            </span>
+                                            <span class="text-gray-600">${opportunity.trim()}</span>
+                                        `;
+                                        opportunitiesEl.appendChild(li);
+                                    });
+                                } else {
+                                    // If no splits, use the whole string
+                                    const li = document.createElement('li');
+                                    li.className = 'flex items-start';
+                                    li.innerHTML = `
+                                        <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-100 text-emerald-600 mr-2 flex-shrink-0">
+                                            <i class="ri-arrow-right-line text-sm"></i>
+                                        </span>
+                                        <span class="text-gray-600">${companyData.opportunities.trim()}</span>
+                                    `;
+                                    opportunitiesEl.appendChild(li);
+                                }
+                            } else {
+                                const li = document.createElement('li');
+                                li.className = 'flex items-start';
+                                li.innerHTML = `
+                                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-100 text-emerald-600 mr-2 flex-shrink-0">
+                                        <i class="ri-arrow-right-line text-sm"></i>
+                                    </span>
+                                    <span class="text-gray-600">No specific opportunities identified</span>
+                                `;
+                                opportunitiesEl.appendChild(li);
+                            }
+                            
+                            // Update annual revenue in Financials tab
+                            if (companyData.revenue) {
+                                document.getElementById('annual-revenue').textContent = companyData.revenue;
+                            }
+                            
+                            // Update financials tab with detailed information
+                            if (companyData.financials) {
+                                // Update annual revenue
+                                if (companyData.financials.annualRevenue) {
+                                    const annualRevenueEl = document.getElementById('annual-revenue');
+                                    if (annualRevenueEl) {
+                                        annualRevenueEl.textContent = companyData.financials.annualRevenue;
+                                    }
+                                }
+                                
+                                try {
+                                    // Find tables in the financials tab
+                                    const financesTables = document.querySelectorAll('#financials-tab table.info-table');
+                                    const metricsTable = financesTables[0];
+                                    const breakdownTable = financesTables[1];
+                                    
+                                    if (metricsTable) {
+                                        // Update growth rate
+                                        if (metricsTable.rows && metricsTable.rows.length > 1) {
+                                            const growthRateRow = metricsTable.rows[1];
+                                            if (growthRateRow && companyData.financials.growthRate) {
+                                                const valueCell = growthRateRow.cells[1].querySelector('span');
+                                                if (valueCell) {
+                                                    valueCell.textContent = companyData.financials.growthRate;
+                                                } else if (growthRateRow.cells[1]) {
+                                                    growthRateRow.cells[1].innerHTML = `<span class="badge badge-green">${companyData.financials.growthRate}</span>`;
+                                                }
+                                            }
+                                            
+                                            // Update profit margin
+                                            if (metricsTable.rows.length > 2) {
+                                                const profitMarginRow = metricsTable.rows[2];
+                                                if (profitMarginRow && companyData.financials.profitMargin) {
+                                                    profitMarginRow.cells[1].textContent = companyData.financials.profitMargin;
+                                                }
+                                            }
+                                            
+                                            // Update funding status
+                                            if (metricsTable.rows.length > 3) {
+                                                const fundingStatusRow = metricsTable.rows[3];
+                                                if (fundingStatusRow && companyData.financials.fundingStatus) {
+                                                    fundingStatusRow.cells[1].textContent = companyData.financials.fundingStatus;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    if (breakdownTable && companyData.financials.revenueBreakdown) {
+                                        // Update revenue breakdown
+                                        const rb = companyData.financials.revenueBreakdown;
+                                        
+                                        if (breakdownTable.rows && breakdownTable.rows.length > 0) {
+                                            // Products
+                                            if (breakdownTable.rows[0] && rb.products) {
+                                                breakdownTable.rows[0].cells[1].textContent = rb.products;
+                                            }
+                                            
+                                            // Services
+                                            if (breakdownTable.rows.length > 1 && breakdownTable.rows[1] && rb.services) {
+                                                breakdownTable.rows[1].cells[1].textContent = rb.services;
+                                            }
+                                            
+                                            // Licensing
+                                            if (breakdownTable.rows.length > 2 && breakdownTable.rows[2] && rb.licensing) {
+                                                breakdownTable.rows[2].cells[1].textContent = rb.licensing;
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Update fiscal performance text
+                                    if (companyData.financials.fiscalPerformance) {
+                                        const fiscalPerformanceEl = document.querySelector('#financials-tab .mt-6 p.text-gray-600');
+                                        if (fiscalPerformanceEl) {
+                                            fiscalPerformanceEl.textContent = companyData.financials.fiscalPerformance;
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error('Error updating financials tab:', error);
+                                }
+                            }
+                            
+                            // Update business model
+                            if (companyData.businessModel) {
+                                document.getElementById('company-business-model').textContent = companyData.businessModel;
+                            }
+                            
+                            // Update competitors data
+                            if (Array.isArray(companyData.competitors) && companyData.competitors.length > 0) {
+                                const competitorsTable = document.querySelector('#competitors-table table tbody');
+                                if (competitorsTable) {
+                                    competitorsTable.innerHTML = '';
+                                    
+                                    companyData.competitors.forEach(competitor => {
+                                        const row = document.createElement('tr');
+                                        
+                                        const badgeColor = competitor.marketShare > 30 ? 'badge-blue' : 
+                                                          competitor.marketShare > 20 ? 'badge-green' : 'badge-yellow';
+                                        
+                                        row.innerHTML = `
+                                            <td class="font-medium">${competitor.name}</td>
+                                            <td><span class="badge ${badgeColor}">${competitor.marketShare}%</span></td>
+                                            <td>${competitor.strengths}</td>
+                                            <td>${competitor.weaknesses}</td>
+                                        `;
+                                        
+                                        competitorsTable.appendChild(row);
+                                    });
+                                } else {
+                                    console.error('Could not find competitors table');
+                                }
+                            }
+                            
+                            // Update discovery questions with specific questions for this company
+                            if (companyData.discoveryQuestions) {
+                                const questionsContainer = document.getElementById('discovery-questions');
+                                questionsContainer.innerHTML = '';
+                                
+                                // Current Challenges Questions
+                                if (Array.isArray(companyData.discoveryQuestions.currentChallenges)) {
+                                    const div = document.createElement('div');
+                                    div.className = 'border-l-4 border-blue-500 pl-4 py-2';
+                                    
+                                    let questionsHTML = '<h4 class="font-medium text-gray-900">Current Challenges</h4>';
+                                    questionsHTML += '<ul class="mt-2 list-disc pl-5 text-gray-600">';
+                                    
+                                    companyData.discoveryQuestions.currentChallenges.forEach(question => {
+                                        questionsHTML += `<li>${question}</li>`;
+                                    });
+                                    
+                                    questionsHTML += '</ul>';
+                                    div.innerHTML = questionsHTML;
+                                    questionsContainer.appendChild(div);
+                                }
+                                
+                                // Goals and Objectives Questions
+                                if (Array.isArray(companyData.discoveryQuestions.goalsAndObjectives)) {
+                                    const div = document.createElement('div');
+                                    div.className = 'border-l-4 border-green-500 pl-4 py-2';
+                                    
+                                    let questionsHTML = '<h4 class="font-medium text-gray-900">Goals and Objectives</h4>';
+                                    questionsHTML += '<ul class="mt-2 list-disc pl-5 text-gray-600">';
+                                    
+                                    companyData.discoveryQuestions.goalsAndObjectives.forEach(question => {
+                                        questionsHTML += `<li>${question}</li>`;
+                                    });
+                                    
+                                    questionsHTML += '</ul>';
+                                    div.innerHTML = questionsHTML;
+                                    questionsContainer.appendChild(div);
+                                }
+                                
+                                // Decision Process Questions
+                                if (Array.isArray(companyData.discoveryQuestions.decisionProcess)) {
+                                    const div = document.createElement('div');
+                                    div.className = 'border-l-4 border-yellow-500 pl-4 py-2';
+                                    
+                                    let questionsHTML = '<h4 class="font-medium text-gray-900">Decision Process</h4>';
+                                    questionsHTML += '<ul class="mt-2 list-disc pl-5 text-gray-600">';
+                                    
+                                    companyData.discoveryQuestions.decisionProcess.forEach(question => {
+                                        questionsHTML += `<li>${question}</li>`;
+                                    });
+                                    
+                                    questionsHTML += '</ul>';
+                                    div.innerHTML = questionsHTML;
+                                    questionsContainer.appendChild(div);
+                                }
+                                
+                                // Budget and Resources Questions
+                                if (Array.isArray(companyData.discoveryQuestions.budgetAndResources)) {
+                                    const div = document.createElement('div');
+                                    div.className = 'border-l-4 border-red-500 pl-4 py-2';
+                                    
+                                    let questionsHTML = '<h4 class="font-medium text-gray-900">Budget and Resources</h4>';
+                                    questionsHTML += '<ul class="mt-2 list-disc pl-5 text-gray-600">';
+                                    
+                                    companyData.discoveryQuestions.budgetAndResources.forEach(question => {
+                                        questionsHTML += `<li>${question}</li>`;
+                                    });
+                                    
+                                    questionsHTML += '</ul>';
+                                    div.innerHTML = questionsHTML;
+                                    questionsContainer.appendChild(div);
+                                }
+                            }
+                            
+                            // Process Tariff Impact data
+                            if (companyData.tariffImpact) {
+                                // Update tariff exposure
+                                if (companyData.tariffImpact.exposure) {
+                                    const tariffExposure = document.getElementById('tariff-exposure');
+                                    tariffExposure.textContent = companyData.tariffImpact.exposure;
+                                    
+                                    // Add appropriate badge class based on exposure level
+                                    tariffExposure.className = 'badge';
+                                    if (companyData.tariffImpact.exposure.toLowerCase() === 'high') {
+                                        tariffExposure.classList.add('badge-red');
+                                    } else if (companyData.tariffImpact.exposure.toLowerCase() === 'medium') {
+                                        tariffExposure.classList.add('badge-yellow');
+                                    } else {
+                                        tariffExposure.classList.add('badge-green');
+                                    }
+                                }
+                                
+                                // Update affected regions
+                                if (Array.isArray(companyData.tariffImpact.regions)) {
+                                    const regionsEl = document.getElementById('affected-regions');
+                                    regionsEl.innerHTML = '';
+                                    
+                                    companyData.tariffImpact.regions.forEach(region => {
+                                        const span = document.createElement('span');
+                                        span.className = 'badge badge-blue';
+                                        span.textContent = region;
+                                        regionsEl.appendChild(span);
+                                    });
+                                }
+                                
+                                // Update impact assessment
+                                if (companyData.tariffImpact.impact) {
+                                    document.getElementById('tariff-impact').textContent = companyData.tariffImpact.impact;
+                                }
+                                
+                                // Update mitigation strategies
+                                if (Array.isArray(companyData.tariffImpact.mitigationStrategies)) {
+                                    const mitigationEl = document.getElementById('mitigation-strategies');
+                                    mitigationEl.innerHTML = '';
+                                    
+                                    companyData.tariffImpact.mitigationStrategies.forEach(strategy => {
+                                        const div = document.createElement('div');
+                                        div.className = 'p-3 bg-emerald-50 rounded-lg border border-emerald-100';
+                                        div.innerHTML = `
+                                            <h5 class="text-emerald-800 font-medium">${strategy}</h5>
+                                        `;
+                                        mitigationEl.appendChild(div);
+                                    });
+                                }
+                            }
+                            
+                            // Update the Salesforce Solutions tab
+                            if (companyData.salesforceRecommendations) {
+                                try {
+                                    // Clear and update the product recommendations
+                                    if (Array.isArray(companyData.salesforceRecommendations.productFit)) {
+                                        const productsContainer = document.getElementById('salesforce-products');
+                                        if (productsContainer) {
+                                            productsContainer.innerHTML = '';
+                                            
+                                            // Create product elements
+                                            companyData.salesforceRecommendations.productFit.forEach(product => {
+                                                // Determine appropriate icon
+                                                let iconClass = 'ri-cloud-line';
+                                                if (product.toLowerCase().includes('sales')) {
+                                                    iconClass = 'ri-customer-service-2-line';
+                                                } else if (product.toLowerCase().includes('service')) {
+                                                    iconClass = 'ri-service-line';
+                                                } else if (product.toLowerCase().includes('marketing')) {
+                                                    iconClass = 'ri-mail-send-line';
+                                                } else if (product.toLowerCase().includes('commerce')) {
+                                                    iconClass = 'ri-shopping-cart-line';
+                                                } else if (product.toLowerCase().includes('tableau')) {
+                                                    iconClass = 'ri-bar-chart-box-line';
+                                                }
+                                                
+                                                const productDiv = document.createElement('div');
+                                                productDiv.className = 'p-4 bg-white rounded-lg border border-indigo-100 shadow-sm hover:shadow-md transition-shadow';
+                                                productDiv.innerHTML = `
+                                                    <div class="flex items-center">
+                                                        <div class="flex-shrink-0 h-12 w-12 rounded-md bg-indigo-50 flex items-center justify-center">
+                                                            <i class="${iconClass} text-indigo-600 text-xl"></i>
+                                                        </div>
+                                                        <div class="ml-4">
+                                                            <h5 class="text-md font-medium text-gray-900">${product}</h5>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                                productsContainer.appendChild(productDiv);
+                                            });
+                                        } else {
+                                            console.error('Could not find salesforce-products container');
+                                        }
+                                    }
+                                    
+                                    // Update value proposition
+                                    if (companyData.salesforceRecommendations.valueProposition) {
+                                        const valueEl = document.getElementById('salesforce-value');
+                                        if (valueEl) {
+                                            valueEl.textContent = companyData.salesforceRecommendations.valueProposition;
+                                        }
+                                    }
+                                    
+                                    // Update ROI
+                                    if (companyData.salesforceRecommendations.roi) {
+                                        const roiEl = document.getElementById('salesforce-roi');
+                                        if (roiEl) {
+                                            roiEl.textContent = companyData.salesforceRecommendations.roi;
+                                        }
+                                    }
+                                    
+                                    // Update implementation considerations
+                                    if (Array.isArray(companyData.salesforceRecommendations.implementationConsiderations)) {
+                                        const considerationsContainer = document.getElementById('implementation-considerations');
+                                        if (considerationsContainer) {
+                                            considerationsContainer.innerHTML = '';
+                                            
+                                            companyData.salesforceRecommendations.implementationConsiderations.forEach(item => {
+                                                const div = document.createElement('div');
+                                                div.className = 'p-3 bg-gray-50 rounded-lg border border-gray-100';
+                                                div.innerHTML = `<h5 class="text-sm font-medium text-gray-900">${item}</h5>`;
+                                                considerationsContainer.appendChild(div);
+                                            });
+                                        } else {
+                                            console.error('Could not find implementation-considerations container');
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error('Error updating Salesforce Solutions tab:', error);
+                                }
+                            }
+                            
+                            // Hide welcome screen and show dashboard
+                            welcomeScreen.classList.add('hidden');
+                            dashboard.classList.remove('hidden');
+                            
+                            // Fetch additional data
+                            fetchTechStack(getDomain(companyData.name || query));
+                            fetchNews(companyData.name || query);
+                            
+                        } catch (error) {
+                            console.error('Error processing company data:', error);
+                            showError('There was an error processing the company data. Please try again.');
+                            loader.classList.add('hidden');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('API error:', error);
+                        showError('There was an error connecting to the server. Please try again.');
+                        loader.classList.add('hidden');
+                    });
+                }
+            });
+            
+            // Extract domain from company name (simple heuristic)
+            function getDomain(companyName) {
+                // Remove Inc, Corp, LLC etc and spaces
+                let domain = companyName.toLowerCase()
+                    .replace(/\s*(inc|corp|llc|ltd|co|company)\.?\s*$/i, '')
+                    .trim()
+                    .replace(/\s+/g, '');
+                
+                return domain + '.com';
+            }
+            
+            // Show error message
+            function showError(message) {
+                // Remove any existing error
+                document.getElementById('error-message')?.remove();
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.id = 'error-message';
+                errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4';
+                errorDiv.innerHTML = `
+                    <span class="block sm:inline">${message}</span>
+                    <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                        <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <title>Close</title>
+                            <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+                        </svg>
+                    </span>
+                `;
+                
+                const searchContainer = document.querySelector('.relative');
+                searchContainer.parentNode.insertBefore(errorDiv, searchContainer.nextSibling);
+                
+                // Add click handler to close
+                errorDiv.querySelector('svg').addEventListener('click', function() {
+                    errorDiv.remove();
+                });
+            }
+            
+            // Fetch technology stack data
+            function fetchTechStack(domain) {
+                fetch(`${API_URL}/api/builtwith?domain=${domain}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const techContainer = document.getElementById('tech-stack');
+                        techContainer.innerHTML = '';
+                        
+                        // Handle errors
+                        if (data.error) {
+                            const div = document.createElement('div');
+                            div.className = 'text-gray-500 italic';
+                            div.textContent = `Could not load technology data: ${data.error}`;
+                            techContainer.appendChild(div);
+                            return;
+                        }
+                        
+                        // Process real BuiltWith data
+                        if (data.Results && data.Results.length > 0 && 
+                            data.Results[0].Result && 
+                            data.Results[0].Result.Paths && 
+                            data.Results[0].Result.Paths.length > 0 &&
+                            data.Results[0].Result.Paths[0].Technologies) {
+                            
+                            const technologies = data.Results[0].Result.Paths[0].Technologies;
+                            
+                            if (technologies.length === 0) {
+                                const div = document.createElement('div');
+                                div.className = 'text-gray-500 italic';
+                                div.textContent = 'No technology data found';
+                                techContainer.appendChild(div);
+                                return;
+                            }
+                            
+                            technologies.forEach(tech => {
+                                const div = document.createElement('div');
+                                div.className = 'flex items-start';
+                                
+                                // Get icon based on technology name
+                                let iconClass = 'ri-code-line';
+                                if (tech.Name.toLowerCase().includes('react')) iconClass = 'ri-reactjs-line';
+                                else if (tech.Name.toLowerCase().includes('aws') || tech.Name.toLowerCase().includes('amazon')) iconClass = 'ri-amazon-line';
+                                else if (tech.Name.toLowerCase().includes('google')) iconClass = 'ri-google-line';
+                                else if (tech.Name.toLowerCase().includes('angular')) iconClass = 'ri-angularjs-line';
+                                else if (tech.Name.toLowerCase().includes('vue')) iconClass = 'ri-vuejs-line';
+                                else if (tech.Name.toLowerCase().includes('database') || tech.Name.toLowerCase().includes('sql')) iconClass = 'ri-database-2-line';
+                                
+                                div.innerHTML = `
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-md bg-blue-50 flex items-center justify-center">
+                                        <i class="${iconClass} text-blue-600 text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-sm font-medium text-gray-900">${tech.Name}</h4>
+                                        <p class="text-xs text-gray-500">${tech.Categories && tech.Categories[0] ? tech.Categories[0].Name : 'Technology'}</p>
+                                    </div>
+                                `;
+                                techContainer.appendChild(div);
+                            });
+                        } else {
+                            const div = document.createElement('div');
+                            div.className = 'text-gray-500 italic';
+                            div.textContent = 'No technology data available for this domain';
+                            techContainer.appendChild(div);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching tech stack:', error);
+                        const techContainer = document.getElementById('tech-stack');
+                        techContainer.innerHTML = '<div class="text-gray-500 italic">Error loading technology data</div>';
+                    });
+            }
+            
+            // Fetch news data
+            function fetchNews(query) {
+                fetch(`${API_URL}/api/news?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const newsContainer = document.getElementById('company-news');
+                        newsContainer.innerHTML = '';
+                        
+                        // Handle errors
+                        if (data.error) {
+                            const div = document.createElement('div');
+                            div.className = 'text-gray-500 italic';
+                            div.textContent = `Could not load news: ${data.error}`;
+                            newsContainer.appendChild(div);
+                            return;
+                        }
+                        
+                        // Process real NewsAPI data
+                        if (data.articles && data.articles.length > 0) {
+                            data.articles.forEach((article, index) => {
+                                const div = document.createElement('div');
+                                div.className = index < data.articles.length - 1 ? 'border-b pb-4 mb-4' : '';
+                                
+                                // Format date
+                                let formattedDate = 'Unknown date';
+                                try {
+                                    const date = new Date(article.publishedAt);
+                                    formattedDate = date.toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    });
+                                } catch (e) {
+                                    console.error('Error formatting date:', e);
+                                }
+                                
+                                div.innerHTML = `
+                                    <a href="${article.url}" target="_blank" class="text-md font-medium text-blue-600 hover:text-blue-800">
+                                        ${article.title}
+                                    </a>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        <span class="font-medium">${article.source?.name || 'Unknown source'}</span> • ${formattedDate}
+                                    </p>
+                                `;
+                                newsContainer.appendChild(div);
+                            });
+                        } else {
+                            newsContainer.innerHTML = '<div class="text-gray-500 italic">No recent news found for this company</div>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching news:', error);
+                        const newsContainer = document.getElementById('company-news');
+                        newsContainer.innerHTML = '<div class="text-gray-500 italic">Error loading news data</div>';
+                    });
+            }
+            
+            // Allow pressing Enter to search
+            searchInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    searchButton.click();
+                }
+            });
+            
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show selected tab content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`${tabName}-tab`).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

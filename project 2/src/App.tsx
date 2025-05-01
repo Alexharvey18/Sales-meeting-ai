@@ -63,10 +63,10 @@ function App() {
               <MainContent />
             </main>
             <Toaster position="top-right" theme="system" />
-            </div>
-      </AccountProvider>
-    </ThemeProvider>
-  </ErrorBoundary>
+          </div>
+        </AccountProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
