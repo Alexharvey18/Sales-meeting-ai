@@ -263,6 +263,231 @@
             color: white;
         }
         
+        /* Buyer Signals Styles */
+        .activity-timeline {
+            margin-top: 1rem;
+        }
+        
+        .activity-item {
+            display: flex;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed var(--mid-gray);
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-date {
+            flex: 0 0 100px;
+            font-weight: bold;
+            color: var(--dark-gray);
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .job-postings {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .job-item {
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 6px;
+        }
+        
+        .job-item h4 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        
+        .social-updates {
+            margin-top: 1rem;
+        }
+        
+        .social-post {
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+        
+        .social-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .social-header div {
+            flex: 1;
+        }
+        
+        /* Battlecard Styles */
+        .battle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .action-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .hooks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .hook-card {
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .pain-points {
+            margin-top: 1rem;
+        }
+        
+        .pain-point {
+            display: flex;
+            margin-bottom: 1rem;
+            align-items: flex-start;
+        }
+        
+        .number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .voicemail {
+            background: var(--light-gray);
+            padding: 1.5rem;
+            border-radius: 6px;
+            border-left: 4px solid var(--secondary);
+            font-style: italic;
+        }
+        
+        .landmine-questions li {
+            margin-bottom: 0.8rem;
+            padding-left: 10px;
+            border-left: 3px solid var(--warning);
+        }
+        
+        /* Account Intelligence Styles */
+        .info-item {
+            margin-bottom: 0.8rem;
+        }
+        
+        .funding-timeline {
+            margin-top: 1rem;
+        }
+        
+        .funding-round {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+        
+        .round-date {
+            flex: 0 0 100px;
+            font-weight: bold;
+        }
+        
+        .round-details {
+            flex: 1;
+        }
+        
+        .round-details h5 {
+            margin: 0 0 5px 0;
+            color: var(--primary);
+        }
+        
+        .org-chart {
+            margin: 1.5rem 0;
+        }
+        
+        .org-level {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .org-box {
+            width: 200px;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .org-box.executive {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .org-box h4 {
+            margin-top: 0;
+        }
+        
+        .tech-changes {
+            margin-top: 1rem;
+        }
+        
+        .tech-change {
+            display: flex;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed var(--mid-gray);
+        }
+        
+        .tech-change:last-child {
+            border-bottom: none;
+        }
+        
+        .change-date {
+            flex: 0 0 100px;
+            font-weight: bold;
+            color: var(--dark-gray);
+        }
+        
+        .change-details {
+            flex: 1;
+        }
+        
+        .change-details h4 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        
         @media (max-width: 768px) {
             .tabs {
                 flex-wrap: wrap;
@@ -296,6 +521,12 @@
         <ul class="tabs">
             <li class="active" data-tab="company-profile">Company Profile</li>
             <li data-tab="sales-insights">Sales Insights</li>
+            <li data-tab="buyer-signals">Buyer Signals</li>
+            <li data-tab="account-intelligence">Account Intel</li>
+            <li data-tab="battlecard">Battlecard</li>
+            <li data-tab="meeting-prep">Meeting Prep</li>
+            <li data-tab="sales-potential">Sales Potential</li>
+            <li data-tab="action-recs">Action Recs</li>
             <li data-tab="tech-stack">Tech Stack</li>
             <li data-tab="news">News</li>
             <li data-tab="tariff-impact">Tariff Impact</li>
@@ -340,6 +571,36 @@
         <!-- Tariff Impact Tab -->
         <div id="tariff-impact" class="tab-content">
             <div id="tariffResult"></div>
+        </div>
+        
+        <!-- Buyer Signals Tab -->
+        <div id="buyer-signals" class="tab-content">
+            <div id="buyerSignalsResult"></div>
+        </div>
+        
+        <!-- Account Intelligence Tab -->
+        <div id="account-intelligence" class="tab-content">
+            <div id="accountIntelligenceResult"></div>
+        </div>
+        
+        <!-- Battlecard Tab -->
+        <div id="battlecard" class="tab-content">
+            <div id="battlecardResult"></div>
+        </div>
+        
+        <!-- Meeting Prep Tab -->
+        <div id="meeting-prep" class="tab-content">
+            <div id="meetingPrepResult"></div>
+        </div>
+        
+        <!-- Sales Potential Tab -->
+        <div id="sales-potential" class="tab-content">
+            <div id="salesPotentialResult"></div>
+        </div>
+        
+        <!-- Action Recommendations Tab -->
+        <div id="action-recs" class="tab-content">
+            <div id="actionRecsResult"></div>
         </div>
     </main>
 
@@ -418,6 +679,15 @@
                 
                 // Sales Insights Tab
                 displaySalesInsights(data);
+                
+                // Buyer Signals Tab
+                displayBuyerSignals(data);
+                
+                // Account Intelligence Tab
+                displayAccountIntelligence(data);
+                
+                // Battlecard Tab
+                displayBattlecard(data);
                 
                 // Tech Stack Tab
                 displayTechStack(data);
@@ -763,6 +1033,325 @@
                 builtWithData.innerHTML = html;
             }
             
+            // Buyer Signals Module
+            function displayBuyerSignals(data) {
+                const buyerSignalsResult = document.getElementById('buyerSignalsResult');
+                
+                let html = `
+                    <div class="card">
+                        <h2>${data.name} - Buyer Signals</h2>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-newspaper"></i> Recent News & Activities</h3>
+                            <div class="activity-timeline">
+                                <div class="activity-item">
+                                    <span class="activity-date">Last week</span>
+                                    <div class="activity-content">
+                                        <span class="tag">Funding</span>
+                                        <p>Secured $25M Series B funding for AI and cloud initiatives</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <span class="activity-date">2 weeks ago</span>
+                                    <div class="activity-content">
+                                        <span class="tag">Executive Change</span>
+                                        <p>Appointed new CTO with background in digital transformation</p>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <span class="activity-date">Last month</span>
+                                    <div class="activity-content">
+                                        <span class="tag">Product Launch</span>
+                                        <p>Launched cloud-based analytics platform for enterprise customers</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-briefcase"></i> Active Job Postings</h3>
+                            <div class="job-postings">
+                                <div class="job-item">
+                                    <h4>Senior Cloud Architect</h4>
+                                    <p>Leading cloud migration initiatives and implementing serverless architecture</p>
+                                    <p><small>Posted 5 days ago</small></p>
+                                </div>
+                                <div class="job-item">
+                                    <h4>AI/ML Product Manager</h4>
+                                    <p>Developing AI-powered features for their SaaS platform</p>
+                                    <p><small>Posted 2 weeks ago</small></p>
+                                </div>
+                                <div class="job-item">
+                                    <h4>Enterprise CRM Specialist</h4>
+                                    <p>Implementing and customizing CRM solutions for enterprise clients</p>
+                                    <p><small>Posted 3 weeks ago</small></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fab fa-linkedin"></i> Social Media Updates</h3>
+                            <div class="social-updates">
+                                <div class="social-post">
+                                    <div class="social-header">
+                                        <img src="https://via.placeholder.com/40" alt="CEO" class="avatar">
+                                        <div>
+                                            <strong>CEO (LinkedIn)</strong>
+                                            <p><small>2 days ago</small></p>
+                                        </div>
+                                        <span class="tag high">Positive</span>
+                                    </div>
+                                    <p>"Excited to announce our new partnership with Microsoft to accelerate our cloud transformation journey!"</p>
+                                </div>
+                                <div class="social-post">
+                                    <div class="social-header">
+                                        <img src="https://via.placeholder.com/40" alt="CMO" class="avatar">
+                                        <div>
+                                            <strong>CMO (Twitter)</strong>
+                                            <p><small>1 week ago</small></p>
+                                        </div>
+                                        <span class="tag medium">Neutral</span>
+                                    </div>
+                                    <p>"Looking for recommendations on enterprise analytics platforms. What are you using and why?"</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                buyerSignalsResult.innerHTML = html;
+            }
+            
+            // Account Intelligence Module
+            function displayAccountIntelligence(data) {
+                const accountIntelligenceResult = document.getElementById('accountIntelligenceResult');
+                
+                let html = `
+                    <div class="card">
+                        <h2>${data.name} - Account Intelligence</h2>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-building"></i> Company Firmographics</h3>
+                            <div class="grid">
+                                <div class="info-item">
+                                    <strong>Founded:</strong> ${data.founded}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Headquarters:</strong> ${data.location}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Revenue:</strong> ${data.revenue}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Employees:</strong> ${data.employees}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Industry:</strong> ${data.industry}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Size:</strong> ${data.size}
+                                </div>
+                            </div>
+                            
+                            <h4>Funding History</h4>
+                            <div class="funding-timeline">
+                                <div class="funding-round">
+                                    <span class="round-date">2022</span>
+                                    <div class="round-details">
+                                        <h5>Series C</h5>
+                                        <p>$75M led by Sequoia Capital</p>
+                                        <p><small>Valuation: $450M</small></p>
+                                    </div>
+                                </div>
+                                <div class="funding-round">
+                                    <span class="round-date">2020</span>
+                                    <div class="round-details">
+                                        <h5>Series B</h5>
+                                        <p>$30M led by Andreessen Horowitz</p>
+                                        <p><small>Valuation: $180M</small></p>
+                                    </div>
+                                </div>
+                                <div class="funding-round">
+                                    <span class="round-date">2018</span>
+                                    <div class="round-details">
+                                        <h5>Series A</h5>
+                                        <p>$12M led by Accel Partners</p>
+                                        <p><small>Valuation: $50M</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-sitemap"></i> Organizational Structure</h3>
+                            <div class="org-chart">
+                                <div class="org-level">
+                                    <div class="org-box executive">
+                                        <h4>CEO</h4>
+                                        <p>John Smith</p>
+                                        <p><small>Former Head of Innovation at TechCorp</small></p>
+                                    </div>
+                                </div>
+                                <div class="org-level">
+                                    <div class="org-box executive">
+                                        <h4>CTO</h4>
+                                        <p>Sarah Johnson</p>
+                                        <p><small>Previously at Amazon AWS</small></p>
+                                    </div>
+                                    <div class="org-box executive">
+                                        <h4>CFO</h4>
+                                        <p>Michael Chen</p>
+                                        <p><small>10+ years financial leadership</small></p>
+                                    </div>
+                                    <div class="org-box executive">
+                                        <h4>CMO</h4>
+                                        <p>Jessica Williams</p>
+                                        <p><small>Former Director at Salesforce</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h4>Recommended Decision Makers to Contact</h4>
+                            <ul class="decision-makers">
+                                <li><strong>VP of Digital Transformation</strong> - Likely oversees technology investments</li>
+                                <li><strong>Director of IT Operations</strong> - Involved in cloud infrastructure decisions</li>
+                                <li><strong>Head of Sales Operations</strong> - Potential champion for CRM solutions</li>
+                                <li><strong>Chief Information Officer</strong> - Ultimate decision maker for enterprise software</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="section">
+                            <h3><i class="fas fa-code-branch"></i> Recent Tech Stack Changes</h3>
+                            <div class="tech-changes">
+                                <div class="tech-change">
+                                    <span class="change-date">Last month</span>
+                                    <div class="change-details">
+                                        <h4>Added: Azure Cloud Services</h4>
+                                        <p>Migrating from on-premise infrastructure to cloud</p>
+                                    </div>
+                                </div>
+                                <div class="tech-change">
+                                    <span class="change-date">3 months ago</span>
+                                    <div class="change-details">
+                                        <h4>Added: Segment Analytics</h4>
+                                        <p>Implementing new customer data platform</p>
+                                    </div>
+                                </div>
+                                <div class="tech-change">
+                                    <span class="change-date">6 months ago</span>
+                                    <div class="change-details">
+                                        <h4>Removed: Legacy CRM System</h4>
+                                        <p>Potential opportunity for new CRM implementation</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                accountIntelligenceResult.innerHTML = html;
+            }
+            
+            // Battlecard Generator Module
+            function displayBattlecard(data) {
+                const battlecardResult = document.getElementById('battlecardResult');
+                
+                let html = `
+                    <div class="card">
+                        <h2>${data.name} - Cold Call Battlecard</h2>
+                        
+                        <div class="section">
+                            <div class="battle-header">
+                                <div>
+                                    <h3><i class="fas fa-bullseye"></i> Cold Call Cheat Sheet</h3>
+                                    <p>Use these insights to guide your conversation and maximize your chances of success.</p>
+                                </div>
+                                <button id="printBattlecard" class="action-btn">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3>Tailored Hooks</h3>
+                            <div class="hooks-container">
+                                <div class="hook-card">
+                                    <h4>Industry Hook</h4>
+                                    <p>"I noticed ${data.name} is leading in ${data.industry} and many similar companies are struggling with [industry challenge]. Our solution has helped them achieve [specific benefit]."</p>
+                                </div>
+                                <div class="hook-card">
+                                    <h4>Context Hook</h4>
+                                    <p>"I see you recently [company news/initiative]. Many companies going through similar changes have found value in our platform because [value proposition]."</p>
+                                </div>
+                                <div class="hook-card">
+                                    <h4>Timing Hook</h4>
+                                    <p>"With the recent [market trend/regulatory change], we've been helping companies like yours adapt by [specific solution]. Would that be relevant to your current priorities?"</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3>Top 3 Pain Points</h3>
+                            <div class="pain-points">
+                                <div class="pain-point">
+                                    <span class="number">1</span>
+                                    <div>
+                                        <h4>${data.challenges[0]}</h4>
+                                        <p>Ask: "How are you currently addressing this challenge?"</p>
+                                    </div>
+                                </div>
+                                <div class="pain-point">
+                                    <span class="number">2</span>
+                                    <div>
+                                        <h4>${data.challenges[1]}</h4>
+                                        <p>Ask: "What impact has this had on your business goals?"</p>
+                                    </div>
+                                </div>
+                                <div class="pain-point">
+                                    <span class="number">3</span>
+                                    <div>
+                                        <h4>${data.challenges[2]}</h4>
+                                        <p>Ask: "Who in your organization is most affected by this?"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3>Suggested Voicemail Script</h3>
+                            <div class="voicemail">
+                                <p>"Hi [Name], this is [Your Name] from Salesforce. I'm reaching out because we've helped several companies in the ${data.industry} industry overcome ${data.challenges[0].toLowerCase()}.</p>
+                                <p>I noticed ${data.name} recently [company news/initiative], and I'd love to share how our platform could support your goals in this area.</p>
+                                <p>I'll follow up with an email, but you can reach me directly at [Your Phone]. Looking forward to connecting!"</p>
+                                <p><strong>Duration:</strong> 30 seconds</p>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h3>Competitor Disruption Questions</h3>
+                            <ul class="landmine-questions">
+                                <li>"How has [Competitor A]'s recent [feature/acquisition] affected your evaluation process?"</li>
+                                <li>"What challenges have you experienced with your current [solution category] implementation?"</li>
+                                <li>"How are you measuring ROI on your existing investments in [technology area]?"</li>
+                                <li>"What would need to change about your current solution to make it ideal for your needs?"</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                battlecardResult.innerHTML = html;
+                
+                // Add print functionality
+                setTimeout(() => {
+                    const printBtn = document.getElementById('printBattlecard');
+                    if (printBtn) {
+                        printBtn.addEventListener('click', () => {
+                            window.print();
+                        });
+                    }
+                }, 100);
+            }
+            
             // Utility functions
             function showLoading() {
                 loadingDiv.style.display = 'block';
@@ -787,6 +1376,12 @@
                 document.getElementById('techResult').innerHTML = '';
                 document.getElementById('newsResult').innerHTML = '';
                 document.getElementById('tariffResult').innerHTML = '';
+                document.getElementById('buyerSignalsResult').innerHTML = '';
+                document.getElementById('accountIntelligenceResult').innerHTML = '';
+                document.getElementById('battlecardResult').innerHTML = '';
+                document.getElementById('meetingPrepResult').innerHTML = '';
+                document.getElementById('salesPotentialResult').innerHTML = '';
+                document.getElementById('actionRecsResult').innerHTML = '';
             }
         });
     </script>
