@@ -38,7 +38,7 @@ app.use(express.static(path.join(__dirname, 'dist')));
 
 // Add route to serve the main HTML file
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index-standalone.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // API status page

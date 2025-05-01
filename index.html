@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Meeting AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background: #f7f7f7;
+        }
+        header {
+            background: #1a237e;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .search-container {
+            margin: 2rem 0;
+        }
+        input[type="text"] {
+            padding: 10px 15px;
+            width: 70%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #304ffe;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1a237e;
+        }
+        #result {
+            margin-top: 2rem;
+        }
+        .card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .loading {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            display: none;
+        }
+        .error {
+            color: #d32f2f;
+            padding: 1rem;
+            background: #ffebee;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sales Meeting AI</h1>
+    </header>
+
+    <main>
+        <h2>Company Research</h2>
+        <p>Enter a company name to get detailed information, challenges, opportunities, and sales strategies.</p>
+
+        <div class="search-container">
+            <input type="text" id="companyInput" placeholder="Enter company name (e.g., Apple, Microsoft, Amazon)">
+            <button id="searchBtn">Search</button>
+        </div>
+
+        <div id="loading" class="loading">Searching for company information...</div>
+        <div id="error" class="error"></div>
+        <div id="result"></div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const companyInput = document.getElementById('companyInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+
+            searchBtn.addEventListener('click', searchCompany);
+            companyInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchCompany();
+                }
+            });
+
+            function searchCompany() {
+                const query = companyInput.value.trim();
+                if (!query) {
+                    showError('Please enter a company name');
+                    return;
+                }
+
+                showLoading();
+                hideError();
+                resultDiv.innerHTML = '';
+
+                fetch(`/api/company?query=${encodeURIComponent(query)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('API request failed');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        hideLoading();
+                        displayResult(data);
+                    })
+                    .catch(error => {
+                        hideLoading();
+                        showError('Failed to get company information. Please try again.');
+                        console.error('Error:', error);
+                    });
+            }
+
+            function displayResult(data) {
+                let html = `
+                    <div class="card">
+                        <h2>${data.name}</h2>
+                        <p><strong>Industry:</strong> ${data.industry}</p>
+                        <p><strong>Size:</strong> ${data.size}</p>
+                        <p><strong>Location:</strong> ${data.location}</p>
+                        <p><strong>Revenue:</strong> ${data.revenue}</p>
+                        <p><strong>Founded:</strong> ${data.founded}</p>
+                        <p><strong>Employees:</strong> ${data.employees}</p>
+                        
+                        <h3>Description</h3>
+                        <p>${data.description}</p>
+                        
+                        <h3>Business Model</h3>
+                        <p>${data.businessModel}</p>
+                        
+                        <h3>Challenges</h3>
+                        <ul>
+                            ${data.challenges.map(challenge => `<li>${challenge}</li>`).join('')}
+                        </ul>
+                        
+                        <h3>Opportunities</h3>
+                        <ul>
+                            ${data.opportunities.map(opportunity => `<li>${opportunity}</li>`).join('')}
+                        </ul>
+                        
+                        <h3>Competitors</h3>
+                        ${data.competitors.map(competitor => `
+                            <div style="margin-bottom: 1rem;">
+                                <p><strong>${competitor.name}</strong> (Market Share: ${competitor.marketShare})</p>
+                                <p><strong>Strengths:</strong> ${competitor.strengths}</p>
+                                <p><strong>Weaknesses:</strong> ${competitor.weaknesses}</p>
+                            </div>
+                        `).join('')}
+                        
+                        <h3>Tariff Impact</h3>
+                        <p><strong>Exposure:</strong> ${data.tariffImpact.exposure}</p>
+                        <p><strong>Regions:</strong> ${data.tariffImpact.regions.join(', ')}</p>
+                        <p><strong>Impact:</strong> ${data.tariffImpact.impact}</p>
+                        <p><strong>Mitigation Strategies:</strong></p>
+                        <ul>
+                            ${data.tariffImpact.mitigationStrategies.map(strategy => `<li>${strategy}</li>`).join('')}
+                        </ul>
+                        
+                        <h3>Salesforce Recommendations</h3>
+                        <p><strong>Product Fit:</strong></p>
+                        <ul>
+                            ${data.salesforceRecommendations.productFit.map(product => `<li>${product}</li>`).join('')}
+                        </ul>
+                        <p><strong>Value Proposition:</strong> ${data.salesforceRecommendations.valueProposition}</p>
+                        <p><strong>Implementation Considerations:</strong></p>
+                        <ul>
+                            ${data.salesforceRecommendations.implementationConsiderations.map(consideration => `<li>${consideration}</li>`).join('')}
+                        </ul>
+                        <p><strong>ROI:</strong> ${data.salesforceRecommendations.roi}</p>
+                        
+                        <h3>Discovery Questions</h3>
+                        <p><strong>Current Challenges:</strong></p>
+                        <ul>
+                            ${data.discoveryQuestions.currentChallenges.map(question => `<li>${question}</li>`).join('')}
+                        </ul>
+                        <p><strong>Goals and Objectives:</strong></p>
+                        <ul>
+                            ${data.discoveryQuestions.goalsAndObjectives.map(question => `<li>${question}</li>`).join('')}
+                        </ul>
+                        <p><strong>Decision Process:</strong></p>
+                        <ul>
+                            ${data.discoveryQuestions.decisionProcess.map(question => `<li>${question}</li>`).join('')}
+                        </ul>
+                        <p><strong>Budget and Resources:</strong></p>
+                        <ul>
+                            ${data.discoveryQuestions.budgetAndResources.map(question => `<li>${question}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                resultDiv.innerHTML = html;
+            }
+
+            function showLoading() {
+                loadingDiv.style.display = 'block';
+            }
+
+            function hideLoading() {
+                loadingDiv.style.display = 'none';
+            }
+
+            function showError(message) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+
+            function hideError() {
+                errorDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> 

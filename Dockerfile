@@ -9,8 +9,8 @@ RUN npm install
 # Copy application files
 COPY . .
 
-# Make sure the standalone HTML file is available and properly named
-RUN if [ -f index-standalone.html ]; then echo "Standalone HTML found"; else echo "WARNING: index-standalone.html not found"; fi
+# Make sure the HTML file is available and properly named
+RUN if [ -f index.html ]; then echo "HTML file found"; else echo "WARNING: index.html not found"; fi
 
 # Set environment variables
 ENV NODE_ENV=production
