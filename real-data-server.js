@@ -80,6 +80,10 @@ app.get('/api/status', (req, res) => {
               <span class="status ${NEWSAPI_KEY ? 'success' : 'error'}"></span>
               NewsAPI: ${NEWSAPI_KEY ? 'Configured' : 'Not Configured'}
             </li>
+            <li>
+              <span class="status ${HUNTER_API_KEY ? 'success' : 'error'}"></span>
+              Hunter.io API: ${HUNTER_API_KEY ? 'Configured' : 'Not Configured'}
+            </li>
           </ul>
           
           <h2>Available Endpoints:</h2>
@@ -94,6 +98,9 @@ app.get('/api/status', (req, res) => {
           </div>
           <div class="endpoint">
             <strong>NewsAPI:</strong> <a href="/api/news?query=Apple" target="_blank">/api/news?query=Apple</a>
+          </div>
+          <div class="endpoint">
+            <strong>Hunter.io:</strong> <a href="/api/executives?company=Example&domain=example.com" target="_blank">/api/executives?company=Example&domain=example.com</a>
           </div>
           <div class="endpoint">
             <strong>Web Scraping:</strong> <a href="/api/scrape?url=https://example.com" target="_blank">/api/scrape?url=https://example.com</a>
@@ -115,7 +122,8 @@ app.get('/test', (req, res) => {
     apisConfigured: {
       openai: !!OPENAI_API_KEY,
       builtwith: !!BUILTWITH_API_KEY,
-      newsapi: !!NEWSAPI_KEY
+      newsapi: !!NEWSAPI_KEY,
+      hunter: !!HUNTER_API_KEY
     }
   });
 });

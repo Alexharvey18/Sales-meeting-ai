@@ -126,41 +126,211 @@ class AccountIntelligenceModule {
         if (cached) return cached;
 
         try {
-            // In a real app, this would call a specialized API like LinkedIn, Apollo.io, etc.
-            // For this demo, we'll generate a basic org chart
+            // Get domain from company name for API call
+            const domain = this.getDomainFromCompanyName(companyName);
             
-            const executives = [
-                { title: 'Chief Executive Officer', name: 'John Smith', linkedInUrl: '#', yearsAtCompany: 5 },
-                { title: 'Chief Technology Officer', name: 'Sarah Johnson', linkedInUrl: '#', yearsAtCompany: 3 },
-                { title: 'Chief Financial Officer', name: 'Michael Chen', linkedInUrl: '#', yearsAtCompany: 2 },
-                { title: 'Chief Marketing Officer', name: 'Lisa Rodriguez', linkedInUrl: '#', yearsAtCompany: 4 },
-                { title: 'Chief Operating Officer', name: 'David Wilson', linkedInUrl: '#', yearsAtCompany: 1 }
-            ];
-
-            // Generate some departments based on executives
-            const departments = [
-                { name: 'Engineering', headCount: Math.floor(Math.random() * 300) + 50, reportsTo: 'Chief Technology Officer' },
-                { name: 'Product', headCount: Math.floor(Math.random() * 100) + 20, reportsTo: 'Chief Technology Officer' },
-                { name: 'Marketing', headCount: Math.floor(Math.random() * 100) + 20, reportsTo: 'Chief Marketing Officer' },
-                { name: 'Sales', headCount: Math.floor(Math.random() * 200) + 50, reportsTo: 'Chief Revenue Officer' },
-                { name: 'Finance', headCount: Math.floor(Math.random() * 50) + 10, reportsTo: 'Chief Financial Officer' },
-                { name: 'Operations', headCount: Math.floor(Math.random() * 50) + 20, reportsTo: 'Chief Operating Officer' },
-                { name: 'Human Resources', headCount: Math.floor(Math.random() * 30) + 10, reportsTo: 'Chief Operating Officer' }
-            ];
-
-            // Structure that combines executives and departments
-            const orgStructure = {
-                executives,
-                departments
-            };
-
-            // Cache the results
-            this.setCache(cacheKey, orgStructure);
-            return orgStructure;
+            // Call the Hunter.io API endpoint
+            const response = await fetch(`${this.apiBaseUrl}/api/executives?company=${encodeURIComponent(companyName)}&domain=${encodeURIComponent(domain)}`);
+            const data = await response.json();
+            
+            // If we have executives data from the API
+            if (data && data.executives && data.executives.length > 0) {
+                // Convert the Hunter API format to our internal format
+                const executives = data.executives.map(exec => {
+                    return {
+                        title: exec.title,
+                        name: exec.name,
+                        linkedInUrl: exec.linkedInUrl || '#',
+                        yearsAtCompany: exec.yearsAtCompany || Math.floor(Math.random() * 5) + 1,
+                        email: exec.email || '',
+                        influence: exec.influence || 'Medium',
+                        priority: exec.priority || 'General business operations'
+                    };
+                });
+                
+                // Generate some departments based on the executives' titles
+                const departments = this.generateDepartmentsFromExecutives(executives);
+                
+                // Structure that combines executives and departments
+                const orgStructure = {
+                    executives,
+                    departments,
+                    source: data.source || 'Hunter.io'
+                };
+                
+                // Cache the results
+                this.setCache(cacheKey, orgStructure);
+                return orgStructure;
+            }
+            
+            // If API doesn't return data, fall back to mock data
+            return this.generateMockOrgStructure();
         } catch (error) {
             console.error('Error fetching org structure:', error);
-            return { executives: [], departments: [] };
+            return this.generateMockOrgStructure();
         }
+    }
+    
+    // Generate departments based on executive titles
+    generateDepartmentsFromExecutives(executives) {
+        const departments = [];
+        const titleToDeptMap = {
+            'CEO': 'Executive',
+            'Chief Executive Officer': 'Executive',
+            'CTO': 'Engineering',
+            'Chief Technology Officer': 'Engineering',
+            'CFO': 'Finance',
+            'Chief Financial Officer': 'Finance',
+            'CMO': 'Marketing',
+            'Chief Marketing Officer': 'Marketing',
+            'COO': 'Operations',
+            'Chief Operating Officer': 'Operations',
+            'CRO': 'Sales',
+            'Chief Revenue Officer': 'Sales',
+            'CHRO': 'Human Resources',
+            'Chief Human Resources Officer': 'Human Resources',
+            'CIO': 'Information Technology',
+            'Chief Information Officer': 'Information Technology',
+            'CDO': 'Data',
+            'Chief Data Officer': 'Data',
+            'CPO': 'Product',
+            'Chief Product Officer': 'Product'
+        };
+        
+        // Create a set of unique departments
+        const deptSet = new Set();
+        
+        // Extract departments from executive titles
+        executives.forEach(exec => {
+            const title = exec.title;
+            // Check for exact matches
+            if (titleToDeptMap[title]) {
+                deptSet.add(titleToDeptMap[title]);
+            } else {
+                // Check for partial matches
+                for (const [key, value] of Object.entries(titleToDeptMap)) {
+                    if (title.includes(key)) {
+                        deptSet.add(value);
+                        break;
+                    }
+                }
+                
+                // Check for common department words
+                if (title.includes('Sales')) deptSet.add('Sales');
+                if (title.includes('Marketing')) deptSet.add('Marketing');
+                if (title.includes('Engineering')) deptSet.add('Engineering');
+                if (title.includes('Product')) deptSet.add('Product');
+                if (title.includes('Finance')) deptSet.add('Finance');
+                if (title.includes('HR') || title.includes('Human Resources')) deptSet.add('Human Resources');
+                if (title.includes('Operations')) deptSet.add('Operations');
+                if (title.includes('IT') || title.includes('Information Technology')) deptSet.add('Information Technology');
+                if (title.includes('Legal')) deptSet.add('Legal');
+                if (title.includes('Customer') || title.includes('Support')) deptSet.add('Customer Support');
+                if (title.includes('Research') || title.includes('Development') || title.includes('R&D')) deptSet.add('Research & Development');
+            }
+        });
+        
+        // Add Executive department if not already there and we have a CEO
+        if (executives.some(exec => exec.title.includes('CEO') || exec.title.includes('Chief Executive'))) {
+            deptSet.add('Executive');
+        }
+        
+        // Add standard departments if we don't have enough
+        if (deptSet.size < 4) {
+            deptSet.add('Engineering');
+            deptSet.add('Sales');
+            deptSet.add('Marketing');
+            deptSet.add('Finance');
+        }
+        
+        // Convert set to departments array with headcount
+        deptSet.forEach(deptName => {
+            departments.push({
+                name: deptName,
+                headCount: Math.floor(Math.random() * 200) + 20,
+                reportsTo: this.getReportingExecutive(deptName, executives)
+            });
+        });
+        
+        return departments;
+    }
+    
+    // Get appropriate reporting executive for department
+    getReportingExecutive(department, executives) {
+        const deptToTitleMap = {
+            'Executive': 'Chief Executive Officer',
+            'Engineering': 'Chief Technology Officer',
+            'Finance': 'Chief Financial Officer',
+            'Marketing': 'Chief Marketing Officer',
+            'Operations': 'Chief Operating Officer',
+            'Sales': 'Chief Revenue Officer',
+            'Human Resources': 'Chief Human Resources Officer',
+            'Information Technology': 'Chief Information Officer',
+            'Data': 'Chief Data Officer',
+            'Product': 'Chief Product Officer',
+            'Research & Development': 'Chief Technology Officer',
+            'Customer Support': 'Chief Operating Officer',
+            'Legal': 'Chief Legal Officer'
+        };
+        
+        // Find exact title match
+        const exactTitle = deptToTitleMap[department];
+        const exactMatch = executives.find(exec => exec.title === exactTitle);
+        if (exactMatch) return exactMatch.title;
+        
+        // Find partial title match
+        for (const exec of executives) {
+            if (exec.title.includes(department)) return exec.title;
+            
+            // Check for common abbreviations
+            if (department === 'Engineering' && (exec.title.includes('CTO') || exec.title.includes('Technology'))) {
+                return exec.title;
+            }
+            if (department === 'Sales' && (exec.title.includes('CRO') || exec.title.includes('Revenue') || exec.title.includes('Sales'))) {
+                return exec.title;
+            }
+            if (department === 'Marketing' && (exec.title.includes('CMO') || exec.title.includes('Marketing'))) {
+                return exec.title;
+            }
+            if (department === 'Finance' && (exec.title.includes('CFO') || exec.title.includes('Finance'))) {
+                return exec.title;
+            }
+            if (department === 'Operations' && (exec.title.includes('COO') || exec.title.includes('Operations'))) {
+                return exec.title;
+            }
+        }
+        
+        // Default to CEO if no match found
+        const ceo = executives.find(exec => exec.title.includes('CEO') || exec.title.includes('Chief Executive'));
+        return ceo ? ceo.title : executives[0]?.title || 'Chief Executive Officer';
+    }
+    
+    // Generate mock org structure data if API fails
+    generateMockOrgStructure() {
+        const executives = [
+            { title: 'Chief Executive Officer', name: 'John Smith', linkedInUrl: '#', yearsAtCompany: 5 },
+            { title: 'Chief Technology Officer', name: 'Sarah Johnson', linkedInUrl: '#', yearsAtCompany: 3 },
+            { title: 'Chief Financial Officer', name: 'Michael Chen', linkedInUrl: '#', yearsAtCompany: 2 },
+            { title: 'Chief Marketing Officer', name: 'Lisa Rodriguez', linkedInUrl: '#', yearsAtCompany: 4 },
+            { title: 'Chief Operating Officer', name: 'David Wilson', linkedInUrl: '#', yearsAtCompany: 1 }
+        ];
+
+        // Generate some departments based on executives
+        const departments = [
+            { name: 'Engineering', headCount: Math.floor(Math.random() * 300) + 50, reportsTo: 'Chief Technology Officer' },
+            { name: 'Product', headCount: Math.floor(Math.random() * 100) + 20, reportsTo: 'Chief Technology Officer' },
+            { name: 'Marketing', headCount: Math.floor(Math.random() * 100) + 20, reportsTo: 'Chief Marketing Officer' },
+            { name: 'Sales', headCount: Math.floor(Math.random() * 200) + 50, reportsTo: 'Chief Revenue Officer' },
+            { name: 'Finance', headCount: Math.floor(Math.random() * 50) + 10, reportsTo: 'Chief Financial Officer' },
+            { name: 'Operations', headCount: Math.floor(Math.random() * 50) + 20, reportsTo: 'Chief Operating Officer' },
+            { name: 'Human Resources', headCount: Math.floor(Math.random() * 30) + 10, reportsTo: 'Chief Operating Officer' }
+        ];
+
+        return {
+            executives,
+            departments,
+            source: 'Mock Data'
+        };
     }
 
     // Fetch tech stack data
@@ -405,6 +575,14 @@ class AccountIntelligenceModule {
         header.className = 'text-lg font-medium text-gray-900 mb-4 flex items-center gap-2';
         header.innerHTML = '<i class="ri-team-line text-blue-500"></i> Organizational Structure';
         
+        // Add data source badge if available
+        if (orgData.source) {
+            const sourceBadge = document.createElement('span');
+            sourceBadge.className = 'text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2';
+            sourceBadge.textContent = `Source: ${orgData.source}`;
+            header.appendChild(sourceBadge);
+        }
+        
         section.appendChild(header);
 
         // Executives table
@@ -414,27 +592,67 @@ class AccountIntelligenceModule {
             
             const executivesTitle = document.createElement('h5');
             executivesTitle.className = 'text-md font-medium mb-3 text-gray-800';
-            executivesTitle.textContent = 'Executive Leadership';
+            executivesTitle.textContent = 'Key Decision Makers';
             
             executivesCard.appendChild(executivesTitle);
             
             const executivesTable = document.createElement('table');
             executivesTable.className = 'w-full info-table';
             
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr class="text-left text-gray-500 text-sm">
+                    <th class="py-2">Title</th>
+                    <th class="py-2">Name</th>
+                    <th class="py-2">Contact</th>
+                    <th class="py-2 text-right">Influence</th>
+                </tr>
+            `;
+            executivesTable.appendChild(thead);
+            
             const tbody = document.createElement('tbody');
             
             orgData.executives.forEach(exec => {
                 const row = document.createElement('tr');
                 
+                // Determine influence badge color
+                let influenceBadgeClass = 'badge-gray';
+                if (exec.influence === 'High') {
+                    influenceBadgeClass = 'badge-green';
+                } else if (exec.influence === 'Medium') {
+                    influenceBadgeClass = 'badge-yellow';
+                } else if (exec.influence === 'Low') {
+                    influenceBadgeClass = 'badge-red';
+                }
+                
+                // Create contact links (LinkedIn and email if available)
+                const contactLinks = [];
+                if (exec.linkedInUrl && exec.linkedInUrl !== '#') {
+                    contactLinks.push(`<a href="${exec.linkedInUrl}" target="_blank" class="text-blue-600 hover:text-blue-800" title="LinkedIn Profile"><i class="ri-linkedin-box-fill"></i></a>`);
+                }
+                if (exec.email) {
+                    contactLinks.push(`<a href="mailto:${exec.email}" class="text-indigo-600 hover:text-indigo-800 ml-2" title="${exec.email}"><i class="ri-mail-line"></i></a>`);
+                }
+                
                 row.innerHTML = `
-                    <td class="font-medium">${exec.title}</td>
-                    <td>
+                    <td class="py-2">
+                        <span class="font-medium">${exec.title}</span>
+                        ${exec.priority ? `<div class="text-xs text-gray-500 mt-1">Focus: ${exec.priority}</div>` : ''}
+                    </td>
+                    <td class="py-2">
                         <div class="flex items-center gap-2">
                             <span>${exec.name}</span>
-                            ${exec.linkedInUrl ? `<a href="${exec.linkedInUrl}" target="_blank" class="text-blue-600 hover:text-blue-800"><i class="ri-linkedin-box-fill"></i></a>` : ''}
                         </div>
                     </td>
-                    <td class="text-right text-gray-500 text-sm">${exec.yearsAtCompany} ${exec.yearsAtCompany === 1 ? 'year' : 'years'}</td>
+                    <td class="py-2">
+                        <div class="flex items-center">
+                            ${contactLinks.length > 0 ? contactLinks.join('') : '<span class="text-gray-400">No contact info</span>'}
+                        </div>
+                    </td>
+                    <td class="py-2 text-right">
+                        <span class="badge ${influenceBadgeClass}">${exec.influence || 'Unknown'}</span>
+                        ${exec.yearsAtCompany ? `<div class="text-xs text-gray-500 mt-1">${exec.yearsAtCompany} ${exec.yearsAtCompany === 1 ? 'year' : 'years'}</div>` : ''}
+                    </td>
                 `;
                 
                 tbody.appendChild(row);
@@ -445,7 +663,7 @@ class AccountIntelligenceModule {
             section.appendChild(executivesCard);
         }
 
-        // Departments visualization
+        // Departments table
         if (orgData.departments && orgData.departments.length > 0) {
             const departmentsCard = document.createElement('div');
             departmentsCard.className = 'bg-white p-4 rounded-lg border border-gray-200 shadow-sm';
@@ -456,25 +674,35 @@ class AccountIntelligenceModule {
             
             departmentsCard.appendChild(departmentsTitle);
             
-            const departmentsContainer = document.createElement('div');
-            departmentsContainer.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4';
+            const departmentsTable = document.createElement('table');
+            departmentsTable.className = 'w-full info-table';
+            
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr class="text-left text-gray-500 text-sm">
+                    <th class="py-2">Department</th>
+                    <th class="py-2">Reports To</th>
+                    <th class="py-2 text-right">Headcount</th>
+                </tr>
+            `;
+            departmentsTable.appendChild(thead);
+            
+            const tbody = document.createElement('tbody');
             
             orgData.departments.forEach(dept => {
-                const deptCard = document.createElement('div');
-                deptCard.className = 'p-3 bg-blue-50 rounded-lg border border-blue-100';
+                const row = document.createElement('tr');
                 
-                deptCard.innerHTML = `
-                    <h6 class="font-medium text-blue-800">${dept.name}</h6>
-                    <p class="text-blue-700 text-sm flex items-center justify-between mt-2">
-                        <span>Headcount: ${dept.headCount}</span>
-                        <span class="text-xs text-blue-600">→ ${dept.reportsTo}</span>
-                    </p>
+                row.innerHTML = `
+                    <td class="py-2 font-medium">${dept.name}</td>
+                    <td class="py-2">${dept.reportsTo || 'Unknown'}</td>
+                    <td class="py-2 text-right">${dept.headCount || 'Unknown'}</td>
                 `;
                 
-                departmentsContainer.appendChild(deptCard);
+                tbody.appendChild(row);
             });
             
-            departmentsCard.appendChild(departmentsContainer);
+            departmentsTable.appendChild(tbody);
+            departmentsCard.appendChild(departmentsTable);
             section.appendChild(departmentsCard);
         }
 

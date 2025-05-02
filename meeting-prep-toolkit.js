@@ -1,9 +1,13 @@
 // Smart Meeting Prep Toolkit Module
 // This module suggests optimal meeting times, objection-handling responses, and provides email templates
 
+import GoogleCalendarModule from './google-calendar-module.js';
+
 class MeetingPrepToolkit {
     constructor() {
         this.apiBaseUrl = 'http://localhost:3001';
+        this.googleCalendarModule = new GoogleCalendarModule();
+        this.recommendedAgendaItems = [];
     }
 
     // Initialize the module
@@ -37,17 +41,23 @@ class MeetingPrepToolkit {
             // Generate email templates
             const emailTemplates = this.generateEmailTemplates(companyName, companyData);
             
+            // Generate recommended agenda
+            const recommendedAgenda = this.generateRecommendedAgenda(companyName, companyData);
+            this.recommendedAgendaItems = recommendedAgenda;
+            
             return {
                 meetingTimes,
                 objectionResponses,
-                emailTemplates
+                emailTemplates,
+                recommendedAgenda
             };
         } catch (error) {
             console.error('Error generating meeting prep data:', error);
             return {
                 meetingTimes: [],
                 objectionResponses: [],
-                emailTemplates: []
+                emailTemplates: [],
+                recommendedAgenda: []
             };
         }
     }
@@ -297,6 +307,23 @@ Best regards,
         return templates;
     }
 
+    // Generate recommended agenda
+    generateRecommendedAgenda(companyName, companyData) {
+        // Get challenges if available
+        const challenge = companyData.challenges && companyData.challenges.length > 0
+            ? companyData.challenges[0].toLowerCase()
+            : 'current business challenges';
+            
+        // Generate agenda items
+        return [
+            { topic: 'Introduction and Rapport Building', durationMinutes: 5 },
+            { topic: `Discovery about ${challenge}`, durationMinutes: 15 },
+            { topic: 'Solution Overview', durationMinutes: 15 },
+            { topic: 'Value Proposition and ROI', durationMinutes: 10 },
+            { topic: 'Next Steps and Action Items', durationMinutes: 5 }
+        ];
+    }
+
     // Render meeting prep to the UI
     renderMeetingPrep(data) {
         // Create a container for the meeting prep if it doesn't exist
@@ -329,6 +356,9 @@ Best regards,
 
         // Clear existing content
         container.innerHTML = '';
+        
+        // Render the recommended agenda first
+        this.renderRecommendedAgenda(container, data.recommendedAgenda);
 
         // Render the meeting time suggestions
         this.renderMeetingTimes(container, data.meetingTimes);
@@ -338,6 +368,80 @@ Best regards,
         
         // Render the email templates
         this.renderEmailTemplates(container, data.emailTemplates);
+    }
+
+    // Render recommended agenda section
+    renderRecommendedAgenda(container, agendaItems) {
+        if (!agendaItems || agendaItems.length === 0) return;
+        
+        const section = document.createElement('div');
+        section.className = 'mb-6';
+        
+        const headerContainer = document.createElement('div');
+        headerContainer.className = 'flex justify-between items-center mb-4';
+        
+        const header = document.createElement('h4');
+        header.className = 'text-lg font-medium text-gray-900 flex items-center gap-2';
+        header.innerHTML = '<i class="ri-list-check text-indigo-500"></i> Recommended Agenda';
+        
+        headerContainer.appendChild(header);
+        section.appendChild(headerContainer);
+        
+        // Create agenda container
+        const agendaContainer = document.createElement('div');
+        agendaContainer.className = 'bg-white p-4 rounded-lg border border-gray-200 shadow-sm';
+        agendaContainer.classList.add('recommended-agenda'); // Add class for easy identification
+        
+        // Create timeline list
+        const timelineList = document.createElement('ol');
+        timelineList.className = 'relative space-y-6 pl-8';
+        
+        // Create vertical line for timeline
+        const verticalLine = document.createElement('div');
+        verticalLine.className = 'absolute left-4 h-full w-0.5 bg-gray-200 dark:bg-gray-700';
+        verticalLine.setAttribute('aria-hidden', 'true');
+        timelineList.appendChild(verticalLine);
+        
+        // Add each agenda item
+        let totalDuration = 0;
+        agendaItems.forEach((item, index) => {
+            totalDuration += item.durationMinutes;
+            
+            const listItem = document.createElement('li');
+            listItem.className = 'relative';
+            
+            // Create the circle marker with duration
+            const marker = document.createElement('div');
+            marker.className = 'absolute -left-8 top-1 w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center';
+            marker.setAttribute('aria-hidden', 'true');
+            marker.innerHTML = `<span class="text-indigo-600 font-medium text-xs">${item.durationMinutes}m</span>`;
+            
+            // Create the agenda item content
+            const content = document.createElement('div');
+            content.className = 'bg-indigo-50 p-3 rounded-lg border border-indigo-100';
+            content.innerHTML = `<h4 class="font-medium text-indigo-800">${item.topic}</h4>`;
+            
+            listItem.appendChild(marker);
+            listItem.appendChild(content);
+            timelineList.appendChild(listItem);
+        });
+        
+        agendaContainer.appendChild(timelineList);
+        
+        // Add total duration note
+        const durationNote = document.createElement('div');
+        durationNote.className = 'mt-4 text-sm text-gray-500 flex items-center justify-between';
+        durationNote.innerHTML = `
+            <span><i class="ri-time-line mr-1"></i> Total Duration: ${totalDuration} minutes</span>
+        `;
+        
+        agendaContainer.appendChild(durationNote);
+        section.appendChild(agendaContainer);
+        
+        // Add Google Calendar integration button
+        this.googleCalendarModule.renderCalendarIntegrationUI(section, this.companyName, this.companyData);
+        
+        container.appendChild(section);
     }
 
     // Render meeting time suggestions section
