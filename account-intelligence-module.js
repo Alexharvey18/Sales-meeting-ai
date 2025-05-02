@@ -573,7 +573,7 @@ class AccountIntelligenceModule {
         
         const header = document.createElement('h4');
         header.className = 'text-lg font-medium text-gray-900 mb-4 flex items-center gap-2';
-        header.innerHTML = '<i class="ri-team-line text-blue-500"></i> Organizational Structure';
+        header.innerHTML = '<i class="ri-team-line text-blue-500"></i> Key Decision Makers';
         
         // Add data source badge if available
         if (orgData.source) {
@@ -584,128 +584,105 @@ class AccountIntelligenceModule {
         }
         
         section.appendChild(header);
-
-        // Executives table
+        
+        // Create executives grid
         if (orgData.executives && orgData.executives.length > 0) {
-            const executivesCard = document.createElement('div');
-            executivesCard.className = 'bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-4';
+            const executivesGrid = document.createElement('div');
+            executivesGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
             
-            const executivesTitle = document.createElement('h5');
-            executivesTitle.className = 'text-md font-medium mb-3 text-gray-800';
-            executivesTitle.textContent = 'Key Decision Makers';
-            
-            executivesCard.appendChild(executivesTitle);
-            
-            const executivesTable = document.createElement('table');
-            executivesTable.className = 'w-full info-table';
-            
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr class="text-left text-gray-500 text-sm">
-                    <th class="py-2">Title</th>
-                    <th class="py-2">Name</th>
-                    <th class="py-2">Contact</th>
-                    <th class="py-2 text-right">Influence</th>
-                </tr>
-            `;
-            executivesTable.appendChild(thead);
-            
-            const tbody = document.createElement('tbody');
-            
-            orgData.executives.forEach(exec => {
-                const row = document.createElement('tr');
+            orgData.executives.forEach(executive => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow';
                 
-                // Determine influence badge color
-                let influenceBadgeClass = 'badge-gray';
-                if (exec.influence === 'High') {
-                    influenceBadgeClass = 'badge-green';
-                } else if (exec.influence === 'Medium') {
-                    influenceBadgeClass = 'badge-yellow';
-                } else if (exec.influence === 'Low') {
-                    influenceBadgeClass = 'badge-red';
-                }
-                
-                // Create contact links (LinkedIn and email if available)
-                const contactLinks = [];
-                if (exec.linkedInUrl && exec.linkedInUrl !== '#') {
-                    contactLinks.push(`<a href="${exec.linkedInUrl}" target="_blank" class="text-blue-600 hover:text-blue-800" title="LinkedIn Profile"><i class="ri-linkedin-box-fill"></i></a>`);
-                }
-                if (exec.email) {
-                    contactLinks.push(`<a href="mailto:${exec.email}" class="text-indigo-600 hover:text-indigo-800 ml-2" title="${exec.email}"><i class="ri-mail-line"></i></a>`);
-                }
-                
-                row.innerHTML = `
-                    <td class="py-2">
-                        <span class="font-medium">${exec.title}</span>
-                        ${exec.priority ? `<div class="text-xs text-gray-500 mt-1">Focus: ${exec.priority}</div>` : ''}
-                    </td>
-                    <td class="py-2">
-                        <div class="flex items-center gap-2">
-                            <span>${exec.name}</span>
+                // Create executive info with enhanced styling
+                let content = `
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                <i class="ri-user-line text-blue-500 text-xl"></i>
+                            </div>
                         </div>
-                    </td>
-                    <td class="py-2">
-                        <div class="flex items-center">
-                            ${contactLinks.length > 0 ? contactLinks.join('') : '<span class="text-gray-400">No contact info</span>'}
-                        </div>
-                    </td>
-                    <td class="py-2 text-right">
-                        <span class="badge ${influenceBadgeClass}">${exec.influence || 'Unknown'}</span>
-                        ${exec.yearsAtCompany ? `<div class="text-xs text-gray-500 mt-1">${exec.yearsAtCompany} ${exec.yearsAtCompany === 1 ? 'year' : 'years'}</div>` : ''}
-                    </td>
+                        <div class="flex-1">
+                            <h5 class="font-medium text-gray-900">${executive.name}</h5>
+                            <p class="text-sm text-gray-600">${executive.title}</p>
                 `;
                 
-                tbody.appendChild(row);
+                // Add email if available (from Hunter.io API)
+                if (executive.email) {
+                    content += `
+                        <div class="mt-2 flex items-center text-sm text-blue-600">
+                            <i class="ri-mail-line mr-1"></i>
+                            <a href="mailto:${executive.email}" class="hover:underline">${executive.email}</a>
+                        </div>
+                    `;
+                }
+                
+                // Add influence badge if available
+                if (executive.influence) {
+                    const influenceColor = 
+                        executive.influence === 'High' ? 'bg-red-100 text-red-700' :
+                        executive.influence === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-green-100 text-green-700';
+                    
+                    content += `
+                        <div class="mt-2 flex flex-wrap gap-1">
+                            <span class="text-xs px-2 py-1 rounded ${influenceColor}">
+                                Influence: ${executive.influence}
+                            </span>
+                    `;
+                    
+                    if (executive.priority) {
+                        content += `
+                            <span class="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700">
+                                ${executive.priority}
+                            </span>
+                        `;
+                    }
+                    
+                    content += `</div>`;
+                }
+                
+                content += `
+                        </div>
+                    </div>
+                `;
+                
+                card.innerHTML = content;
+                executivesGrid.appendChild(card);
             });
             
-            executivesTable.appendChild(tbody);
-            executivesCard.appendChild(executivesTable);
-            section.appendChild(executivesCard);
+            section.appendChild(executivesGrid);
+        } else {
+            const noData = document.createElement('p');
+            noData.className = 'text-gray-500 italic';
+            noData.textContent = 'No key decision maker data available for this company.';
+            section.appendChild(noData);
         }
-
-        // Departments table
+        
+        // Add departments if available
         if (orgData.departments && orgData.departments.length > 0) {
-            const departmentsCard = document.createElement('div');
-            departmentsCard.className = 'bg-white p-4 rounded-lg border border-gray-200 shadow-sm';
+            const departmentsHeader = document.createElement('h5');
+            departmentsHeader.className = 'text-md font-medium text-gray-900 mt-6 mb-3';
+            departmentsHeader.textContent = 'Departments';
+            section.appendChild(departmentsHeader);
             
-            const departmentsTitle = document.createElement('h5');
-            departmentsTitle.className = 'text-md font-medium mb-3 text-gray-800';
-            departmentsTitle.textContent = 'Departments';
-            
-            departmentsCard.appendChild(departmentsTitle);
-            
-            const departmentsTable = document.createElement('table');
-            departmentsTable.className = 'w-full info-table';
-            
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr class="text-left text-gray-500 text-sm">
-                    <th class="py-2">Department</th>
-                    <th class="py-2">Reports To</th>
-                    <th class="py-2 text-right">Headcount</th>
-                </tr>
-            `;
-            departmentsTable.appendChild(thead);
-            
-            const tbody = document.createElement('tbody');
+            const departmentsList = document.createElement('div');
+            departmentsList.className = 'grid grid-cols-1 md:grid-cols-2 gap-3';
             
             orgData.departments.forEach(dept => {
-                const row = document.createElement('tr');
-                
-                row.innerHTML = `
-                    <td class="py-2 font-medium">${dept.name}</td>
-                    <td class="py-2">${dept.reportsTo || 'Unknown'}</td>
-                    <td class="py-2 text-right">${dept.headCount || 'Unknown'}</td>
+                const deptItem = document.createElement('div');
+                deptItem.className = 'flex items-center bg-gray-50 p-3 rounded-lg';
+                deptItem.innerHTML = `
+                    <i class="ri-building-line text-gray-500 mr-2"></i>
+                    <span>${dept.name}</span>
+                    ${dept.headCount ? `<span class="ml-auto text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">${dept.headCount} people</span>` : ''}
                 `;
-                
-                tbody.appendChild(row);
+                departmentsList.appendChild(deptItem);
             });
             
-            departmentsTable.appendChild(tbody);
-            departmentsCard.appendChild(departmentsTable);
-            section.appendChild(departmentsCard);
+            section.appendChild(departmentsList);
         }
-
+        
         container.appendChild(section);
     }
 

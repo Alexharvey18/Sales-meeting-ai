@@ -373,75 +373,318 @@ Best regards,
     // Render recommended agenda section
     renderRecommendedAgenda(container, agendaItems) {
         if (!agendaItems || agendaItems.length === 0) return;
-        
+
         const section = document.createElement('div');
-        section.className = 'mb-6';
-        
-        const headerContainer = document.createElement('div');
-        headerContainer.className = 'flex justify-between items-center mb-4';
+        section.className = 'mb-6 recommended-agenda';
         
         const header = document.createElement('h4');
-        header.className = 'text-lg font-medium text-gray-900 flex items-center gap-2';
-        header.innerHTML = '<i class="ri-list-check text-indigo-500"></i> Recommended Agenda';
+        header.className = 'text-lg font-medium text-gray-900 mb-4 flex items-center gap-2';
+        header.innerHTML = '<i class="ri-list-check-2 text-blue-500"></i> Recommended Agenda';
         
-        headerContainer.appendChild(header);
-        section.appendChild(headerContainer);
+        const agendaList = document.createElement('ol');
+        agendaList.className = 'list-decimal pl-5 space-y-2';
         
-        // Create agenda container
-        const agendaContainer = document.createElement('div');
-        agendaContainer.className = 'bg-white p-4 rounded-lg border border-gray-200 shadow-sm';
-        agendaContainer.classList.add('recommended-agenda'); // Add class for easy identification
-        
-        // Create timeline list
-        const timelineList = document.createElement('ol');
-        timelineList.className = 'relative space-y-6 pl-8';
-        
-        // Create vertical line for timeline
-        const verticalLine = document.createElement('div');
-        verticalLine.className = 'absolute left-4 h-full w-0.5 bg-gray-200 dark:bg-gray-700';
-        verticalLine.setAttribute('aria-hidden', 'true');
-        timelineList.appendChild(verticalLine);
-        
-        // Add each agenda item
-        let totalDuration = 0;
-        agendaItems.forEach((item, index) => {
-            totalDuration += item.durationMinutes;
-            
+        // Add agenda items
+        agendaItems.forEach(item => {
             const listItem = document.createElement('li');
-            listItem.className = 'relative';
+            listItem.className = 'text-gray-800';
+            listItem.innerHTML = `<strong>${item.topic}</strong>: ${item.topic}`;
             
-            // Create the circle marker with duration
-            const marker = document.createElement('div');
-            marker.className = 'absolute -left-8 top-1 w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center';
-            marker.setAttribute('aria-hidden', 'true');
-            marker.innerHTML = `<span class="text-indigo-600 font-medium text-xs">${item.durationMinutes}m</span>`;
+            if (item.durationMinutes) {
+                const timeTag = document.createElement('span');
+                timeTag.className = 'ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded';
+                timeTag.innerHTML = `~${item.durationMinutes}m`;
+                listItem.appendChild(timeTag);
+            }
             
-            // Create the agenda item content
-            const content = document.createElement('div');
-            content.className = 'bg-indigo-50 p-3 rounded-lg border border-indigo-100';
-            content.innerHTML = `<h4 class="font-medium text-indigo-800">${item.topic}</h4>`;
-            
-            listItem.appendChild(marker);
-            listItem.appendChild(content);
-            timelineList.appendChild(listItem);
+            agendaList.appendChild(listItem);
         });
         
-        agendaContainer.appendChild(timelineList);
-        
-        // Add total duration note
-        const durationNote = document.createElement('div');
-        durationNote.className = 'mt-4 text-sm text-gray-500 flex items-center justify-between';
-        durationNote.innerHTML = `
-            <span><i class="ri-time-line mr-1"></i> Total Duration: ${totalDuration} minutes</span>
-        `;
-        
-        agendaContainer.appendChild(durationNote);
-        section.appendChild(agendaContainer);
+        section.appendChild(header);
+        section.appendChild(agendaList);
         
         // Add Google Calendar integration button
-        this.googleCalendarModule.renderCalendarIntegrationUI(section, this.companyName, this.companyData);
+        const calendarButtonContainer = document.createElement('div');
+        calendarButtonContainer.className = 'mt-4';
+        
+        const calendarButton = document.createElement('button');
+        calendarButton.id = 'gcal-integration-button';
+        calendarButton.className = 'flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 transition-colors';
+        calendarButton.innerHTML = '<i class="ri-calendar-event-line"></i> Schedule Meeting in Google Calendar';
+        
+        calendarButton.addEventListener('click', () => {
+            this.showCalendarModal(agendaItems);
+        });
+        
+        calendarButtonContainer.appendChild(calendarButton);
+        section.appendChild(calendarButtonContainer);
         
         container.appendChild(section);
+    }
+
+    // Show Calendar Modal
+    showCalendarModal(agendaItems) {
+        // Remove any existing modals
+        const existingModal = document.getElementById('calendar-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Create modal container
+        const modal = document.createElement('div');
+        modal.id = 'calendar-modal';
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        
+        // Create modal content
+        const modalContent = document.createElement('div');
+        modalContent.className = 'bg-white rounded-lg shadow-xl max-w-md w-full';
+        
+        // Create modal header
+        const modalHeader = document.createElement('div');
+        modalHeader.className = 'px-6 py-4 border-b border-gray-200';
+        modalHeader.innerHTML = '<h3 class="text-lg font-medium text-gray-900">Schedule Meeting</h3>';
+        
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.className = 'absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none';
+        closeButton.innerHTML = '<i class="ri-close-line text-xl"></i>';
+        closeButton.addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        modalHeader.appendChild(closeButton);
+        modalContent.appendChild(modalHeader);
+        
+        // Create modal body
+        const modalBody = document.createElement('div');
+        modalBody.className = 'px-6 py-4';
+        
+        // Create form
+        const form = document.createElement('form');
+        form.className = 'space-y-4';
+        
+        // Meeting title
+        const titleGroup = document.createElement('div');
+        titleGroup.innerHTML = `
+            <label class="block text-sm font-medium text-gray-700">Meeting Title</label>
+            <input type="text" id="meeting-title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
+                value="Meeting with ${this.companyName}">
+        `;
+        
+        // Meeting date and time
+        const dateTimeGroup = document.createElement('div');
+        dateTimeGroup.className = 'grid grid-cols-2 gap-4';
+        dateTimeGroup.innerHTML = `
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Date</label>
+                <input type="date" id="meeting-date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Time</label>
+                <input type="time" id="meeting-time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+        `;
+        
+        // Meeting duration
+        const durationGroup = document.createElement('div');
+        durationGroup.innerHTML = `
+            <label class="block text-sm font-medium text-gray-700">Duration</label>
+            <select id="meeting-duration" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <option value="30">30 minutes</option>
+                <option value="60" selected>1 hour</option>
+                <option value="90">1.5 hours</option>
+                <option value="120">2 hours</option>
+            </select>
+        `;
+        
+        // Attendees
+        const attendeesGroup = document.createElement('div');
+        attendeesGroup.innerHTML = `
+            <label class="block text-sm font-medium text-gray-700">Attendees (Email addresses, comma separated)</label>
+            <input type="text" id="meeting-attendees" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        `;
+        
+        // Agenda
+        const agendaGroup = document.createElement('div');
+        agendaGroup.innerHTML = `
+            <label class="block text-sm font-medium text-gray-700">Agenda</label>
+            <textarea id="meeting-agenda" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">${this.formatAgendaForCalendar(agendaItems)}</textarea>
+        `;
+        
+        // Add form groups
+        form.appendChild(titleGroup);
+        form.appendChild(dateTimeGroup);
+        form.appendChild(durationGroup);
+        form.appendChild(attendeesGroup);
+        form.appendChild(agendaGroup);
+        
+        // Add Google auth status
+        const authStatus = document.createElement('div');
+        authStatus.id = 'auth-status';
+        authStatus.className = 'mt-4 py-2 px-3 bg-gray-100 text-gray-700 rounded';
+        authStatus.textContent = 'Google Calendar not connected. Click "Connect to Google Calendar" below.';
+        
+        // Add form to modal
+        modalBody.appendChild(form);
+        modalBody.appendChild(authStatus);
+        modalContent.appendChild(modalBody);
+        
+        // Create modal footer
+        const modalFooter = document.createElement('div');
+        modalFooter.className = 'px-6 py-3 border-t border-gray-200 flex justify-between';
+        
+        // Create Google auth button
+        const authButton = document.createElement('button');
+        authButton.id = 'google-auth-button';
+        authButton.type = 'button';
+        authButton.className = 'inline-flex items-center gap-1 bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500';
+        authButton.innerHTML = '<i class="ri-google-fill text-red-500"></i> Connect to Google Calendar';
+        authButton.addEventListener('click', () => {
+            this.googleCalendarModule.authorize().then(isAuthorized => {
+                this.updateAuthStatus(isAuthorized);
+            });
+        });
+        
+        // Create submit button
+        const submitButton = document.createElement('button');
+        submitButton.type = 'button';
+        submitButton.className = 'inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
+        submitButton.textContent = 'Create Event';
+        submitButton.addEventListener('click', () => {
+            this.createCalendarEvent();
+        });
+        
+        // Add buttons to footer
+        modalFooter.appendChild(authButton);
+        modalFooter.appendChild(submitButton);
+        
+        // Add footer to modal
+        modalContent.appendChild(modalFooter);
+        
+        // Add modal to page
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        // Set default date to today
+        const today = new Date();
+        const dateInput = document.getElementById('meeting-date');
+        if (dateInput) {
+            dateInput.valueAsDate = today;
+        }
+        
+        // Set default time to next hour
+        const timeInput = document.getElementById('meeting-time');
+        if (timeInput) {
+            const nextHour = new Date();
+            nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
+            timeInput.value = `${String(nextHour.getHours()).padStart(2, '0')}:00`;
+        }
+        
+        // Check if already authorized
+        this.googleCalendarModule.checkAuth().then(isAuthorized => {
+            this.updateAuthStatus(isAuthorized);
+        });
+    }
+    
+    // Update auth status in modal
+    updateAuthStatus(isAuthorized) {
+        const authStatus = document.getElementById('auth-status');
+        const authButton = document.getElementById('google-auth-button');
+        
+        if (isAuthorized) {
+            authStatus.textContent = 'Connected to Google Calendar';
+            authStatus.className = 'mt-4 py-2 px-3 bg-green-100 text-green-700 rounded';
+            
+            if (authButton) {
+                authButton.innerHTML = '<i class="ri-google-fill text-red-500"></i> Connected to Google';
+                authButton.className = 'inline-flex items-center gap-1 bg-green-50 border border-green-300 rounded-md shadow-sm px-4 py-2 text-sm font-medium text-green-700 focus:outline-none';
+                authButton.disabled = true;
+            }
+        } else {
+            authStatus.textContent = 'Google Calendar not connected. Click "Connect to Google Calendar" below.';
+            authStatus.className = 'mt-4 py-2 px-3 bg-gray-100 text-gray-700 rounded';
+            
+            if (authButton) {
+                authButton.innerHTML = '<i class="ri-google-fill text-red-500"></i> Connect to Google Calendar';
+                authButton.className = 'inline-flex items-center gap-1 bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500';
+                authButton.disabled = false;
+            }
+        }
+    }
+    
+    // Create calendar event
+    createCalendarEvent() {
+        // Check if authorized first
+        this.googleCalendarModule.checkAuth().then(isAuthorized => {
+            if (!isAuthorized) {
+                alert('Please connect to Google Calendar first.');
+                return;
+            }
+            
+            // Get form values
+            const title = document.getElementById('meeting-title').value;
+            const dateInput = document.getElementById('meeting-date').value;
+            const timeInput = document.getElementById('meeting-time').value;
+            const durationMinutes = parseInt(document.getElementById('meeting-duration').value, 10);
+            const attendees = document.getElementById('meeting-attendees').value.split(',').map(email => email.trim());
+            const agenda = document.getElementById('meeting-agenda').value;
+            
+            if (!title || !dateInput || !timeInput) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Create start and end times
+            const startDateTime = new Date(`${dateInput}T${timeInput}`);
+            const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60000);
+            
+            // Create event details
+            const event = {
+                summary: title,
+                description: agenda,
+                start: {
+                    dateTime: startDateTime.toISOString(),
+                },
+                end: {
+                    dateTime: endDateTime.toISOString(),
+                },
+                attendees: attendees.map(email => ({ email })),
+                reminders: {
+                    useDefault: true
+                }
+            };
+            
+            // Create the event
+            this.googleCalendarModule.createEvent(event)
+                .then(createdEvent => {
+                    if (createdEvent) {
+                        alert('Meeting scheduled successfully!');
+                        document.getElementById('calendar-modal').remove();
+                    } else {
+                        alert('Failed to create event. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error creating event:', error);
+                    alert('Error creating event: ' + error.message);
+                });
+        });
+    }
+    
+    // Format agenda items for calendar
+    formatAgendaForCalendar(agendaItems) {
+        if (!agendaItems || agendaItems.length === 0) {
+            return 'Discuss next steps';
+        }
+        
+        let formattedAgenda = 'Meeting Agenda:\n\n';
+        
+        agendaItems.forEach((item, index) => {
+            formattedAgenda += `${index+1}. ${item.topic} ${item.durationMinutes ? `(${item.durationMinutes}m)` : ''}\n`;
+            formattedAgenda += `   ${item.topic}\n\n`;
+        });
+        
+        return formattedAgenda;
     }
 
     // Render meeting time suggestions section
