@@ -10,6 +10,10 @@ An AI-powered sales meeting preparation tool that provides company information, 
 - Company challenges and opportunities analysis
 - Sales readiness recommendations
 
+## New Features
+
+- Account Tiering Module: A CSV-based tool to tier accounts based on weighted criteria with AI enrichment.
+
 ## Deployment
 
 This application is configured for easy deployment on Render.com.
