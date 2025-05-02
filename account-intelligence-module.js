@@ -36,14 +36,16 @@ class AccountIntelligenceModule {
             return {
                 firmographics: firmographics.status === 'fulfilled' ? firmographics.value : this.getDefaultFirmographics(),
                 orgChart: orgChart.status === 'fulfilled' ? orgChart.value : [],
-                techStack: techStack.status === 'fulfilled' ? techStack.value : []
+                techStack: techStack.status === 'fulfilled' ? techStack.value : [],
+                secFilings: await this.getSecFilings(companyName, this.companyData.ticker)
             };
         } catch (error) {
             console.error('Error fetching account intelligence:', error);
             return {
                 firmographics: this.getDefaultFirmographics(),
                 orgChart: [],
-                techStack: []
+                techStack: [],
+                secFilings: []
             };
         }
     }
@@ -284,6 +286,9 @@ class AccountIntelligenceModule {
         
         // Render the tech stack
         this.renderTechStack(container, data.techStack);
+
+        // Render SEC filings
+        this.renderFinancialDocuments(data.secFilings);
     }
 
     // Render firmographics section
@@ -556,6 +561,50 @@ class AccountIntelligenceModule {
         container.appendChild(section);
     }
 
+    // Render SEC filings
+    renderFinancialDocuments(secFilings) {
+        if (!secFilings || secFilings.length === 0) {
+            return `<div class="empty-state">
+                <i class="ri-file-list-3-line"></i>
+                <p>No SEC filings found</p>
+            </div>`;
+        }
+        
+        // Group filings by type
+        const groupedFilings = {};
+        secFilings.forEach(filing => {
+            const type = filing.type || 'Other';
+            if (!groupedFilings[type]) {
+                groupedFilings[type] = [];
+            }
+            groupedFilings[type].push(filing);
+        });
+        
+        let html = '<div class="sec-filings-container">';
+        
+        // Add each filing type group
+        for (const [type, filings] of Object.entries(groupedFilings)) {
+            html += `<div class="filing-group">
+                <h4>${type}</h4>
+                <ul class="filing-list">`;
+            
+            filings.forEach(filing => {
+                html += `<li class="filing-item">
+                    <a href="${filing.url}" target="_blank" class="filing-link">
+                        <span class="filing-date">${filing.filingDate || 'N/A'}</span>
+                        <span class="filing-desc">${filing.description}</span>
+                        <i class="ri-external-link-line"></i>
+                    </a>
+                </li>`;
+            });
+            
+            html += `</ul></div>`;
+        }
+        
+        html += '</div>';
+        return html;
+    }
+
     // Ensure the account intelligence tab exists
     ensureAccountIntelligenceTab() {
         // Check if the tab already exists
@@ -625,6 +674,36 @@ class AccountIntelligenceModule {
             timestamp: Date.now(),
             data
         });
+    }
+
+    // Add a method to fetch SEC filings
+    async getSecFilings(companyName, tickerSymbol) {
+        try {
+            // Construct the API URL with available parameters
+            let url = `${this.apiBaseUrl}/api/sec-filings?`;
+            
+            if (tickerSymbol) {
+                url += `symbol=${encodeURIComponent(tickerSymbol)}`;
+            } else if (companyName) {
+                url += `company=${encodeURIComponent(companyName)}`;
+            } else {
+                console.error('Either company name or ticker symbol is required to fetch SEC filings');
+                return null;
+            }
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('SEC filings API error:', errorData);
+                return null;
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching SEC filings:', error);
+            return null;
+        }
     }
 }
 

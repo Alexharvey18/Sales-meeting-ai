@@ -59,15 +59,15 @@ class BattlecardGenerator {
         const defaultHooks = [
             {
                 title: "Industry Trend",
-                hook: `I've been speaking with several leaders in the ${companyData.industry || 'technology'} space about [industry trend]. How is your team approaching this challenge?`
+                hook: `I've been speaking with several leaders in the ${companyData.industry || 'technology'} space about ${companyData.challenges?.[0] || 'digital transformation'}. How is your team approaching this challenge?`
             },
             {
                 title: "Peer Success",
-                hook: "We recently helped a similar company in your industry improve their efficiency by 30%. They were facing challenges with [common pain point]."
+                hook: `We recently helped a similar company in your industry improve their efficiency by 30%. They were facing challenges with ${companyData.challenges?.[1] || 'data integration and customer experience'}.`
             },
             {
                 title: "Recent News",
-                hook: `I noticed the recent announcement about your [expansion/product launch/initiative]. Many companies find this creates challenges in [related area].`
+                hook: `I noticed the recent announcement about your ${companyData.opportunities?.[0] || 'expansion plans'}. Many companies find this creates challenges in ${companyData.challenges?.[2] || 'scaling operations efficiently'}.`
             }
         ];
 
@@ -79,7 +79,7 @@ class BattlecardGenerator {
             if (companyData.industry) {
                 customHooks.push({
                     title: "Industry Insight",
-                    hook: `Many ${companyData.industry} companies are struggling with [industry-specific challenge]. Is this something your team is experiencing?`
+                    hook: `Many ${companyData.industry} companies are struggling with ${companyData.challenges?.[0] || 'increased competition and rapid technological change'}. Is this something your team is experiencing?`
                 });
             }
             
@@ -97,9 +97,10 @@ class BattlecardGenerator {
             
             // Add tech stack hook if tech stack is mentioned
             if (companyData.techStack || (companyData.technology && companyData.technology.length > 0)) {
+                const tech = companyData.technology?.[0]?.name || 'your current technology stack';
                 customHooks.push({
                     title: "Technology Integration",
-                    hook: `I noticed your company uses [specific technology]. Our solution integrates seamlessly with your existing tech stack to improve [specific benefit].`
+                    hook: `I noticed your company uses ${tech}. Our solution integrates seamlessly with your existing tech stack to improve ${companyData.opportunities?.[0] || 'operational efficiency'}.`
                 });
             }
             
@@ -161,13 +162,35 @@ class BattlecardGenerator {
 
     // Generate voicemail script
     generateVoicemailScript(companyName, companyData) {
+        const painPoint = companyData.challenges?.[0] || 
+            `challenges common in the ${companyData.industry || 'technology'} sector`;
+        
+        const relevantMetric = companyData.industry === 'Financial Services' ? 'customer retention' :
+            companyData.industry === 'Healthcare' ? 'patient outcomes' :
+            companyData.industry === 'Manufacturing' ? 'production efficiency' :
+            companyData.industry === 'Retail' ? 'customer conversion rates' :
+            'operational efficiency';
+        
+        const achievement = companyData.industry === 'Financial Services' ? '40%' :
+            companyData.industry === 'Healthcare' ? '35%' :
+            companyData.industry === 'Manufacturing' ? '27%' :
+            companyData.industry === 'Retail' ? '50%' :
+            '30%';
+        
+        const valueProposition = companyData.opportunities?.[0] || 
+            (companyData.industry === 'Financial Services' ? 'improving client experience' :
+            companyData.industry === 'Healthcare' ? 'optimizing patient care workflows' :
+            companyData.industry === 'Manufacturing' ? 'streamlining production processes' :
+            companyData.industry === 'Retail' ? 'enhancing omnichannel customer experiences' :
+            'streamlining critical business processes');
+
         return `Hi [Prospect Name], this is [Your Name] from [Your Company].
 
-I've been researching ${companyName} and noticed you might be facing challenges with [specific pain point relevant to their industry/company size].
+I've been researching ${companyName} and noticed you might be facing challenges with ${painPoint}.
 
-We've helped similar ${companyData.industry || 'companies'} improve their [relevant metric] by [achievement percentage], and I'd love to share some insights that might be valuable for your team.
+We've helped similar ${companyData.industry || 'companies'} improve their ${relevantMetric} by ${achievement}, and I'd love to share some insights that might be valuable for your team.
 
-I'm available for a quick 15-minute call this week to discuss how we might be able to help ${companyName} with [specific value proposition]. Please call me back at [your phone number] or email me at [your email].
+I'm available for a quick 15-minute call this week to discuss how we might be able to help ${companyName} with ${valueProposition}. Please call me back at [your phone number] or email me at [your email].
 
 Thanks, and I look forward to connecting with you.`;
     }
@@ -176,7 +199,7 @@ Thanks, and I look forward to connecting with you.`;
     generateCompetitorQuestions(companyData) {
         // Default competitor questions
         const defaultQuestions = [
-            "What solutions have you tried in the past to address [pain point]?",
+            `What solutions have you tried in the past to address ${companyData.challenges?.[0] || 'your key business challenges'}?`,
             "Which vendors are you currently considering for solving this challenge?",
             "What criteria are most important to you when evaluating potential solutions?",
             "What would need to happen for you to consider changing from your current solution?",

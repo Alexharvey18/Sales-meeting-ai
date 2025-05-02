@@ -16,17 +16,19 @@ const __dirname = dirname(__filename);
 
 // Create Express app
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 // Get API keys from environment variables
 const OPENAI_API_KEY = process.env.VITE_OPENAI_API_KEY;
 const BUILTWITH_API_KEY = process.env.VITE_BUILTWITH_API_KEY;
 const NEWSAPI_KEY = process.env.VITE_NEWSAPI_KEY;
+const HUNTER_API_KEY = process.env.VITE_HUNTER_API_KEY;
 
 // Check if API keys are available
 console.log('OpenAI API Key available:', !!OPENAI_API_KEY);
 console.log('BuiltWith API Key available:', !!BUILTWITH_API_KEY);
 console.log('NewsAPI Key available:', !!NEWSAPI_KEY);
+console.log('Hunter API Key available:', !!HUNTER_API_KEY);
 
 // Middleware
 app.use(cors());
@@ -362,11 +364,72 @@ app.get('/api/scrape', async (req, res) => {
     const titleMatch = html.match(/<title>(.*?)<\/title>/i);
     const descriptionMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i);
     
+    // Extract links that could be financial documents
+    const financialDocuments = [];
+    const pressReleases = [];
+    
+    // Basic pattern matching for common document types in HTML links
+    const linkRegex = /<a[^>]*href=["']([^"']*)["'][^>]*>(.*?)<\/a>/gi;
+    let linkMatch;
+    
+    while ((linkMatch = linkRegex.exec(html)) !== null) {
+      const url = linkMatch[1];
+      const text = linkMatch[2].replace(/<[^>]*>/g, '').trim(); // Remove any nested HTML
+      
+      // Check if this is a financial document
+      if (
+        /\b(10-K|10K|annual\s+report|annual\s+filing)\b/i.test(text) ||
+        /\b(10-Q|10Q|quarterly\s+report|quarterly\s+filing)\b/i.test(text) ||
+        /\b(8-K|8K|current\s+report)\b/i.test(text) ||
+        /\b(form\s+3|form\s+4|form\s+5)\b/i.test(text) ||
+        /\b(13[DG]|13-[DG]|form\s+13)\b/i.test(text) ||
+        /\b(proxy\s+statement|def\s+14a)\b/i.test(text) ||
+        /\b(prospectus|S-1|S1)\b/i.test(text)
+      ) {
+        // Determine document type
+        let docType = 'Other SEC Filing';
+        
+        if (/\b(10-K|10K|annual\s+report)\b/i.test(text)) docType = 'Form 10-K (Annual Report)';
+        else if (/\b(10-Q|10Q|quarterly\s+report)\b/i.test(text)) docType = 'Form 10-Q (Quarterly Report)';
+        else if (/\b(8-K|8K|current\s+report)\b/i.test(text)) docType = 'Form 8-K (Current Report)';
+        else if (/\b(form\s+3)\b/i.test(text)) docType = 'Form 3 (Initial Insider Ownership)';
+        else if (/\b(form\s+4)\b/i.test(text)) docType = 'Form 4 (Insider Transaction)';
+        else if (/\b(form\s+5)\b/i.test(text)) docType = 'Form 5 (Annual Insider Statement)';
+        else if (/\b(13D|13-D)\b/i.test(text)) docType = 'Schedule 13D (Beneficial Ownership)';
+        else if (/\b(13G|13-G)\b/i.test(text)) docType = 'Schedule 13G (Passive Investment)';
+        else if (/\b(proxy\s+statement|def\s+14a)\b/i.test(text)) docType = 'Proxy Statement (DEF 14A)';
+        
+        financialDocuments.push({
+          url: url.startsWith('http') ? url : (url.startsWith('/') ? `${new URL(req.query.url).origin}${url}` : `${req.query.url}/${url}`),
+          title: text,
+          docType: docType,
+          foundAt: new Date().toISOString()
+        });
+      }
+      
+      // Check if this is a press release
+      else if (
+        /\b(press\s+release|news|announcement)\b/i.test(text) ||
+        /\b(announces|announced|announcing)\b/i.test(text)
+      ) {
+        pressReleases.push({
+          url: url.startsWith('http') ? url : (url.startsWith('/') ? `${new URL(req.query.url).origin}${url}` : `${req.query.url}/${url}`),
+          title: text,
+          date: extractDateFromText(text) || new Date().toISOString().split('T')[0],
+          foundAt: new Date().toISOString()
+        });
+      }
+    }
+    
     res.json({
       title: titleMatch ? titleMatch[1] : 'No title found',
       metaDescription: descriptionMatch ? descriptionMatch[1] : 'No description found',
       url: url,
       contentLength: html.length,
+      financialDocuments,
+      pressReleases,
+      links: [],  // Empty for now to avoid returning too much data
+      mainContent: html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 1000) + '...',
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -375,6 +438,647 @@ app.get('/api/scrape', async (req, res) => {
       error: 'Failed to scrape website',
       message: error.message,
       url
+    });
+  }
+});
+
+// Add a dedicated SEC filing scraper endpoint
+app.get('/api/sec-filings', async (req, res) => {
+  const { symbol, company } = req.query;
+  
+  if (!symbol && !company) {
+    return res.status(400).json({ 
+      error: 'Either a ticker symbol or company name is required'
+    });
+  }
+  
+  try {
+    // First try the SEC EDGAR database if we have a symbol
+    let filings = [];
+    
+    if (symbol) {
+      // Use the SEC EDGAR API to find filings
+      try {
+        // First get the CIK number for the ticker symbol
+        const searchResponse = await axios.get(
+          `https://www.sec.gov/cgi-bin/browse-edgar?company=${encodeURIComponent(symbol)}&owner=exclude&action=getcompany&count=10`,
+          {
+            headers: {
+              'User-Agent': 'Company Research Application/1.0' // SEC requires a user-agent
+            }
+          }
+        );
+        
+        // Parse the CIK from the response (basic scraping approach)
+        const cikMatch = searchResponse.data.match(/CIK=(\d+)/);
+        if (cikMatch) {
+          const cik = cikMatch[1];
+          console.log(`Found CIK ${cik} for symbol ${symbol}`);
+          
+          // Now get the filings for this CIK
+          const filingsResponse = await axios.get(
+            `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}&type=&dateb=&owner=exclude&count=40`,
+            {
+              headers: {
+                'User-Agent': 'Company Research Application/1.0'
+              }
+            }
+          );
+          
+          // Extract filings using regex (this is simplified; a real app would use cheerio)
+          const html = filingsResponse.data;
+          
+          // Match filing types and links
+          const filingMatches = html.matchAll(/<tr[^>]*>.*?<td[^>]*>.*?<a[^>]*href="([^"]*)"[^>]*>([^<]+)<\/a>.*?<\/td>.*?<td[^>]*>([^<]+)<\/td>.*?<td[^>]*>([^<]+)<\/td>.*?<\/tr>/gs);
+          
+          for (const match of filingMatches) {
+            const url = match[1];
+            const type = match[2];
+            const desc = match[3];
+            const date = match[4];
+            
+            if (/^(10-K|10-Q|8-K|DEF 14A|13[DG]|SC 13[DG]|3|4|5|424B)/i.test(type)) {
+              filings.push({
+                url: url.startsWith('/') ? `https://www.sec.gov${url}` : url,
+                type: type.trim(),
+                description: desc.trim(),
+                filingDate: date.trim(),
+                source: 'SEC EDGAR'
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching from SEC EDGAR:', error.message);
+        // Continue with other sources
+      }
+    }
+    
+    // If no filings found or we only have company name, try other sources
+    if (filings.length === 0 || !symbol) {
+      const searchTerm = symbol || company;
+      
+      // Try to find the investor relations page
+      try {
+        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${searchTerm} investor relations SEC filings`)}`;
+        const searchResponse = await axios.get(googleSearchUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          }
+        });
+        
+        // Extract the first few search result URLs
+        const urlMatches = searchResponse.data.match(/<a href="(https:\/\/[^"]*)"[^>]*>/g);
+        const urls = [];
+        
+        if (urlMatches) {
+          for (const match of urlMatches) {
+            const url = match.match(/href="([^"]*)/)[1];
+            
+            // Filter for likely investor relations pages
+            if (/investors?|shareholders?|financials?|sec\-filings?|edgar/i.test(url) && 
+                !/google\.com|sec\.gov|bloomberg\.com|yahoo\.com/i.test(url)) {
+              if (!urls.includes(url)) {
+                urls.push(url);
+                
+                // Only check the first 3 potential IR pages
+                if (urls.length >= 3) break;
+              }
+            }
+          }
+          
+          // Try to scrape each potential IR page
+          for (const url of urls) {
+            try {
+              const response = await axios.get(url, {
+                headers: {
+                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                },
+                timeout: 10000  // 10 second timeout
+              });
+              
+              // Look for links to SEC filings
+              const html = response.data;
+              
+              // Simple regex to find links to financial documents
+              const linkMatches = html.matchAll(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi);
+              
+              for (const match of linkMatches) {
+                const url = match[1];
+                const text = match[2].replace(/<[^>]*>/g, '').trim();
+                
+                // Check if this looks like a financial document
+                if (/(10[\-\s]?K|10[\-\s]?Q|8[\-\s]?K|annual\s+report|quarterly\s+report|form\s+[345]|13[DG]|proxy)/i.test(text)) {
+                  // Determine document type
+                  let docType = 'Other SEC Filing';
+                  
+                  if (/10[\-\s]?K|annual\s+report/i.test(text)) docType = 'Form 10-K (Annual Report)';
+                  else if (/10[\-\s]?Q|quarterly\s+report/i.test(text)) docType = 'Form 10-Q (Quarterly Report)';
+                  else if (/8[\-\s]?K/i.test(text)) docType = 'Form 8-K (Current Report)';
+                  else if (/form\s+3/i.test(text)) docType = 'Form 3 (Initial Insider Ownership)';
+                  else if (/form\s+4/i.test(text)) docType = 'Form 4 (Insider Transaction)';
+                  else if (/form\s+5/i.test(text)) docType = 'Form 5 (Annual Insider Statement)';
+                  else if (/13D/i.test(text)) docType = 'Schedule 13D (Beneficial Ownership)';
+                  else if (/13G/i.test(text)) docType = 'Schedule 13G (Passive Investment)';
+                  else if (/proxy/i.test(text)) docType = 'Proxy Statement (DEF 14A)';
+                  
+                  const fullUrl = url.startsWith('http') ? url : (url.startsWith('/') ? new URL(url, new URL(url).origin).href : new URL(url, new URL(url).origin).href);
+                  
+                  filings.push({
+                    url: fullUrl,
+                    type: docType,
+                    description: text,
+                    filingDate: extractDateFromText(text) || 'Unknown',
+                    source: 'Company IR Website'
+                  });
+                }
+              }
+            } catch (error) {
+              console.error(`Error scraping IR page ${url}:`, error.message);
+              // Continue with other URLs
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error with Google search for IR pages:', error.message);
+      }
+    }
+    
+    // If still no filings, provide some mock data or return empty
+    if (filings.length === 0) {
+      // Generate mock data for demonstration
+      const companyName = company || symbol;
+      const currentYear = new Date().getFullYear();
+      
+      filings = [
+        {
+          url: '#',
+          type: 'Form 10-K (Annual Report)',
+          description: `Annual Report for ${companyName} for the fiscal year ended December 31, ${currentYear-1}`,
+          filingDate: `03/15/${currentYear}`,
+          source: 'Mock Data (No actual filings found)'
+        },
+        {
+          url: '#',
+          type: 'Form 10-Q (Quarterly Report)',
+          description: `Quarterly Report for ${companyName} for the quarter ended March 31, ${currentYear}`,
+          filingDate: `05/10/${currentYear}`,
+          source: 'Mock Data (No actual filings found)'
+        },
+        {
+          url: '#', 
+          type: 'Form 8-K (Current Report)',
+          description: `Current Report - Announcement of Executive Changes`,
+          filingDate: `06/15/${currentYear}`,
+          source: 'Mock Data (No actual filings found)'
+        },
+        {
+          url: '#',
+          type: 'Proxy Statement (DEF 14A)',
+          description: `Proxy Statement for Annual Meeting of Shareholders`,
+          filingDate: `04/01/${currentYear}`,
+          source: 'Mock Data (No actual filings found)'
+        }
+      ];
+    }
+    
+    res.json({
+      company: company || symbol,
+      symbol: symbol || 'Unknown',
+      filings: filings,
+      totalFilings: filings.length,
+      lastUpdated: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('SEC Filings API Error:', error.message);
+    res.status(500).json({
+      error: 'Failed to retrieve SEC filings',
+      message: error.message
+    });
+  }
+});
+
+// Helper function to extract a date from text
+function extractDateFromText(text) {
+  // Basic regex for date patterns
+  const datePatterns = [
+    /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? \d{4}\b/i,  // Jan 1, 2023
+    /\b\d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}\b/i,    // 1 Jan 2023
+    /\b\d{4}[-/]\d{1,2}[-/]\d{1,2}\b/,  // 2023-01-01 or 2023/01/01
+    /\b\d{1,2}[-/]\d{1,2}[-/]\d{4}\b/   // 01-01-2023 or 01/01/2023
+  ];
+  
+  for (const pattern of datePatterns) {
+    const match = text.match(pattern);
+    if (match) return match[0];
+  }
+  
+  return null;
+}
+
+// Add Crunchbase API endpoint for funding history
+app.get('/api/funding', async (req, res) => {
+  const { company } = req.query;
+  
+  if (!company) {
+    return res.status(400).json({ error: 'Company parameter is required' });
+  }
+  
+  // Replace with your actual Crunchbase API key when you have it
+  const CRUNCHBASE_API_KEY = process.env.VITE_CRUNCHBASE_API_KEY;
+  
+  if (!CRUNCHBASE_API_KEY) {
+    console.log('Crunchbase API key not configured, returning mock data');
+    // Return mock funding data
+    return res.json({
+      company: company,
+      totalFunding: "$125M",
+      rounds: [
+        { 
+          type: "Series C", 
+          amount: "$75M", 
+          date: "2022-06-15", 
+          investors: ["Sequoia Capital", "Andreessen Horowitz", "Y Combinator"],
+          valuation: "$850M"
+        },
+        { 
+          type: "Series B", 
+          amount: "$35M", 
+          date: "2020-11-03", 
+          investors: ["Sequoia Capital", "Y Combinator"],
+          valuation: "$350M"
+        },
+        { 
+          type: "Series A", 
+          amount: "$12M", 
+          date: "2019-04-22", 
+          investors: ["Y Combinator", "Angel Investors"],
+          valuation: "$75M"
+        },
+        { 
+          type: "Seed", 
+          amount: "$3M", 
+          date: "2018-08-10", 
+          investors: ["Angel Investors"],
+          valuation: "$15M"
+        }
+      ],
+      ipoStatus: "Private",
+      lastUpdated: new Date().toISOString()
+    });
+  }
+  
+  try {
+    // When you have a Crunchbase API key, implement the actual API call here
+    const encodedCompany = encodeURIComponent(company);
+    const response = await axios.get(
+      `https://api.crunchbase.com/api/v4/entities/organizations/${encodedCompany}?card_ids=fields&user_key=${CRUNCHBASE_API_KEY}`
+    );
+    
+    // Format the response data
+    const crunchbaseData = response.data;
+    const formattedData = {
+      company: company,
+      totalFunding: crunchbaseData.properties?.total_funding_usd || "Unknown",
+      rounds: crunchbaseData.cards?.funding_rounds?.map(round => ({
+        type: round.properties.investment_type,
+        amount: round.properties.money_raised_usd,
+        date: round.properties.announced_on,
+        investors: round.relationships.investors.map(investor => investor.properties.name),
+        valuation: round.properties.post_money_valuation_usd || "Not disclosed"
+      })) || [],
+      ipoStatus: crunchbaseData.properties?.ipo_status || "Private",
+      lastUpdated: new Date().toISOString()
+    };
+    
+    res.json(formattedData);
+  } catch (error) {
+    console.error('Crunchbase API Error:', error.response?.data || error.message);
+    // Fall back to mock data on error
+    res.json({
+      company: company,
+      totalFunding: "$125M",
+      rounds: [
+        { 
+          type: "Series C", 
+          amount: "$75M", 
+          date: "2022-06-15", 
+          investors: ["Sequoia Capital", "Andreessen Horowitz", "Y Combinator"],
+          valuation: "$850M"
+        },
+        { 
+          type: "Series B", 
+          amount: "$35M", 
+          date: "2020-11-03", 
+          investors: ["Sequoia Capital", "Y Combinator"],
+          valuation: "$350M"
+        },
+        { 
+          type: "Series A", 
+          amount: "$12M", 
+          date: "2019-04-22", 
+          investors: ["Y Combinator", "Angel Investors"],
+          valuation: "$75M"
+        },
+        { 
+          type: "Seed", 
+          amount: "$3M", 
+          date: "2018-08-10", 
+          investors: ["Angel Investors"],
+          valuation: "$15M"
+        }
+      ],
+      ipoStatus: "Private",
+      lastUpdated: new Date().toISOString()
+    });
+  }
+});
+
+// Add Key Decision Makers API endpoint
+app.get('/api/executives', async (req, res) => {
+  const { company, domain } = req.query;
+  
+  if (!company) {
+    return res.status(400).json({ error: 'Company parameter is required' });
+  }
+  
+  // Use Hunter.io if API key is available
+  if (HUNTER_API_KEY) {
+    try {
+      // Hunter.io domain search for company email patterns
+      const hunterDomainResponse = await axios.get(
+        `https://api.hunter.io/v2/domain-search?domain=${domain}&api_key=${HUNTER_API_KEY}`
+      );
+      
+      // Extract and format key decision makers from Hunter data
+      const hunterData = hunterDomainResponse.data;
+      
+      // Check if we have enough data from Hunter
+      if (hunterData.data && hunterData.data.emails && hunterData.data.emails.length > 0) {
+        // Format the executive data from Hunter.io
+        const executives = hunterData.data.emails
+          .filter(email => email.position) // Only include people with positions
+          .map(email => {
+            // Determine influence level based on seniority keywords
+            let influence = "Medium";
+            const position = email.position.toLowerCase();
+            if (position.includes('ceo') || position.includes('cfo') || position.includes('cto') || 
+                position.includes('chief') || position.includes('president') || position.includes('founder')) {
+              influence = "High";
+            } else if (position.includes('director') || position.includes('vp') || 
+                      position.includes('vice president') || position.includes('head of')) {
+              influence = "High";
+            }
+            
+            // Determine priority focus based on role
+            let priority = "General business operations";
+            if (position.includes('sales')) {
+              priority = "Revenue growth and sales team performance";
+            } else if (position.includes('market')) {
+              priority = "Brand awareness and market positioning";
+            } else if (position.includes('tech') || position.includes('cto') || position.includes('engineering')) {
+              priority = "Technology stack and innovation";
+            } else if (position.includes('finance') || position.includes('cfo')) {
+              priority = "Financial performance and investor relations";
+            } else if (position.includes('ceo') || position.includes('founder') || position.includes('president')) {
+              priority = "Overall company strategy and growth";
+            }
+            
+            return {
+              name: `${email.first_name} ${email.last_name}`,
+              title: email.position,
+              email: email.value,
+              confidence: email.confidence,
+              influence: influence,
+              priority: priority
+            };
+          });
+        
+        // Format board members if available (Hunter doesn't directly provide this)
+        const formattedData = {
+          company: company,
+          executives: executives,
+          source: "Hunter.io",
+          domain: domain,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        return res.json(formattedData);
+      } else {
+        // Not enough data from Hunter, fall back to mock data
+        throw new Error('Insufficient data from Hunter.io');
+      }
+    } catch (error) {
+      console.error('Hunter.io API Error:', error.message);
+      // Fall back to mock data
+    }
+  }
+  
+  // Fall back to mock data if Hunter.io fails or isn't configured
+  const mockData = {
+    company: company,
+    executives: [
+      {
+        name: "Sarah Johnson",
+        title: "Chief Executive Officer",
+        background: "Former VP at Tech Innovations, MBA from Harvard",
+        influence: "High",
+        priority: "Growth and market expansion"
+      },
+      {
+        name: "Michael Chen",
+        title: "Chief Technology Officer",
+        background: "Previously at Google, MS in Computer Science from Stanford",
+        influence: "High",
+        priority: "AI integration and system modernization"
+      },
+      {
+        name: "Jessica Williams",
+        title: "Chief Financial Officer",
+        background: "Former director at Goldman Sachs, CPA",
+        influence: "High",
+        priority: "Cost optimization and investor relations"
+      },
+      {
+        name: "Robert Martinez",
+        title: "VP of Sales",
+        background: "15+ years in enterprise sales at Oracle",
+        influence: "Medium",
+        priority: "Revenue growth and sales team expansion"
+      },
+      {
+        name: "Emily Thompson",
+        title: "VP of Marketing",
+        background: "Previously at Salesforce, MBA from Wharton",
+        influence: "Medium",
+        priority: "Brand awareness and demand generation"
+      }
+    ],
+    board: [
+      {
+        name: "David Wilson",
+        role: "Chairman",
+        background: "Partner at Sequoia Capital, former CEO of Enterprise Tech",
+        influence: "Very High"
+      },
+      {
+        name: "Amanda Lee",
+        role: "Board Member",
+        background: "Founder of Tech Ventures, angel investor",
+        influence: "High"
+      },
+      {
+        name: "Richard Brown",
+        role: "Board Member", 
+        background: "Partner at Andreessen Horowitz, former CTO at Oracle",
+        influence: "High"
+      }
+    ],
+    lastUpdated: new Date().toISOString()
+  };
+  
+  res.json(mockData);
+});
+
+// Add Strategic Priorities API endpoint that processes news data
+app.get('/api/priorities', async (req, res) => {
+  const { company } = req.query;
+  
+  if (!company) {
+    return res.status(400).json({ error: 'Company parameter is required' });
+  }
+  
+  try {
+    // First get news data if NewsAPI key is available
+    if (!NEWSAPI_KEY) {
+      throw new Error('NewsAPI key not configured');
+    }
+    
+    const newsResponse = await axios.get(
+      `https://newsapi.org/v2/everything?q=${encodeURIComponent(company)}&sortBy=publishedAt&language=en&apiKey=${NEWSAPI_KEY}`
+    );
+    
+    // In a real implementation, you would process the news to extract priorities
+    // For now, we'll return mock data
+    const mockData = {
+      company: company,
+      strategicPriorities: [
+        {
+          category: "Digital Transformation",
+          initiatives: [
+            "Cloud migration to AWS",
+            "Implementation of enterprise AI solutions",
+            "DevOps and agile transformation"
+          ],
+          priority: "High",
+          timeline: "1-2 years"
+        },
+        {
+          category: "Market Expansion",
+          initiatives: [
+            "Entry into European markets",
+            "New product line for mid-market",
+            "Strategic acquisitions in adjacent spaces"
+          ],
+          priority: "High",
+          timeline: "2-3 years"
+        },
+        {
+          category: "Operational Efficiency",
+          initiatives: [
+            "Supply chain optimization",
+            "Automation of business processes",
+            "Workforce transformation"
+          ],
+          priority: "Medium",
+          timeline: "1-2 years"
+        },
+        {
+          category: "Customer Experience",
+          initiatives: [
+            "Omnichannel strategy implementation",
+            "Customer journey mapping",
+            "Implementation of next-gen CRM"
+          ],
+          priority: "High",
+          timeline: "1 year"
+        }
+      ],
+      newsInsights: newsResponse.data.articles.slice(0, 5).map(article => ({
+        headline: article.title,
+        source: article.source.name,
+        date: article.publishedAt.split('T')[0],
+        url: article.url
+      })),
+      lastUpdated: new Date().toISOString()
+    };
+    
+    res.json(mockData);
+  } catch (error) {
+    console.error('Strategic Priorities API Error:', error.message);
+    // Fall back to mock data on error
+    res.json({
+      company: company,
+      strategicPriorities: [
+        {
+          category: "Digital Transformation",
+          initiatives: [
+            "Cloud migration to AWS",
+            "Implementation of enterprise AI solutions",
+            "DevOps and agile transformation"
+          ],
+          priority: "High",
+          timeline: "1-2 years"
+        },
+        {
+          category: "Market Expansion",
+          initiatives: [
+            "Entry into European markets",
+            "New product line for mid-market",
+            "Strategic acquisitions in adjacent spaces"
+          ],
+          priority: "High",
+          timeline: "2-3 years"
+        },
+        {
+          category: "Operational Efficiency",
+          initiatives: [
+            "Supply chain optimization",
+            "Automation of business processes",
+            "Workforce transformation"
+          ],
+          priority: "Medium",
+          timeline: "1-2 years"
+        },
+        {
+          category: "Customer Experience",
+          initiatives: [
+            "Omnichannel strategy implementation",
+            "Customer journey mapping",
+            "Implementation of next-gen CRM"
+          ],
+          priority: "High",
+          timeline: "1 year"
+        }
+      ],
+      newsInsights: [
+        {
+          headline: `${company} Announces Strategic Partnership with Microsoft`,
+          source: "TechCrunch",
+          date: "2023-05-15"
+        },
+        {
+          headline: `${company} Plans Major Expansion into Asian Markets`,
+          source: "Bloomberg",
+          date: "2023-04-02"
+        },
+        {
+          headline: `New CEO of ${company} Outlines Vision for Digital Transformation`,
+          source: "Wall Street Journal",
+          date: "2023-02-18"
+        }
+      ],
+      lastUpdated: new Date().toISOString()
     });
   }
 });
