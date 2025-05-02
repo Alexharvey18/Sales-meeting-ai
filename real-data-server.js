@@ -130,7 +130,7 @@ app.get('/test', (req, res) => {
 
 // OpenAI API endpoint
 app.post('/api/openai', async (req, res) => {
-  const { query } = req.body;
+  const { query, purpose } = req.body;
   
   if (!query) {
     return res.status(400).json({ error: 'Query parameter is required' });
@@ -138,6 +138,60 @@ app.post('/api/openai', async (req, res) => {
   
   if (!OPENAI_API_KEY) {
     return res.status(500).json({ error: 'OpenAI API key not configured' });
+  }
+  
+  // Set different system messages based on the purpose
+  let systemMessage = '';
+  
+  if (purpose === 'account_tiering') {
+    systemMessage = `You are a helpful assistant that provides structured account information for sales account tiering.
+      Analyze the account data and return a JSON object with the following fields:
+      - employees: Number of employees (with assessment like "High", "Medium", "Low" if exact number unknown)
+      - revenue: Annual revenue (with assessment like "High", "Medium", "Low" if exact number unknown)
+      - industryGrowth: Growth trend assessment ("High", "Medium", "Low")
+      - govInvestment: Level of government investment in the industry ("High", "Medium", "Low")
+      - businessActivity: Recent positive business activity ("Positive", "Neutral", "Negative")
+      - hiringTrends: Current and projected hiring activities ("Strong", "Moderate", "Weak")
+      - techAdoption: Willingness to adopt technology/AI ("High", "Medium", "Low")
+      - tariffExposure: Exposure to international tariffs, especially for Quebec accounts ("High", "Medium", "Low")
+      - justification: A brief 2-3 sentence justification for these assessments
+      
+      Return your response as a JSON object only, without any additional text or explanation.`;
+  } else {
+    // Default system message for general company information
+    systemMessage = `You are a helpful assistant that provides structured company information for sales prospecting.
+      Return your response as a JSON object with the following fields:
+      - name: Company name
+      - industry: Primary industry
+      - size: Company size (small, medium, large, enterprise)
+      - location: HQ location
+      - revenue: Annual revenue range
+      - founded: Year founded
+      - employees: Number of employees (range)
+      - description: Detailed company description (at least 2-3 paragraphs) including their business model, market position, and how they make money
+      - businessModel: 1-2 paragraphs specifically explaining how the company makes money and their revenue streams
+      - challenges: Array of 3-5 key business challenges the company is likely facing
+      - opportunities: Array of 3-5 business opportunities
+      - competitors: Array of objects with the following fields:
+        - name: Competitor company name
+        - marketShare: Estimated market share percentage
+        - strengths: String listing key strengths of this competitor
+        - weaknesses: String listing key weaknesses of this competitor
+      - tariffImpact: Object with fields:
+        - exposure: High/Medium/Low exposure to international tariffs
+        - regions: Array of affected regions (e.g., ["China", "EU", "Mexico"])
+        - impact: Brief explanation of how tariffs might impact their operations/costs
+        - mitigationStrategies: Array of 2-3 strategies they might employ to mitigate tariff impacts
+      - salesforceRecommendations: Object with fields:
+        - productFit: Array of 2-3 Salesforce products that would address their needs
+        - valueProposition: How Salesforce specifically addresses their industry challenges
+        - implementationConsiderations: Array of 2-3 key considerations for implementation
+        - roi: Brief explanation of potential ROI from Salesforce implementation
+      - discoveryQuestions: Object with fields:
+        - currentChallenges: Array of 3-4 specific questions tailored to this company's challenges
+        - goalsAndObjectives: Array of 3-4 specific questions related to this company's goals
+        - decisionProcess: Array of 3-4 specific questions about their decision-making process
+        - budgetAndResources: Array of 3-4 specific questions about budget and resources`;
   }
   
   try {
@@ -148,43 +202,13 @@ app.post('/api/openai', async (req, res) => {
         messages: [
           {
             role: 'system',
-            content: `You are a helpful assistant that provides structured company information for sales prospecting.
-            Return your response as a JSON object with the following fields:
-            - name: Company name
-            - industry: Primary industry
-            - size: Company size (small, medium, large, enterprise)
-            - location: HQ location
-            - revenue: Annual revenue range
-            - founded: Year founded
-            - employees: Number of employees (range)
-            - description: Detailed company description (at least 2-3 paragraphs) including their business model, market position, and how they make money
-            - businessModel: 1-2 paragraphs specifically explaining how the company makes money and their revenue streams
-            - challenges: Array of 3-5 key business challenges the company is likely facing
-            - opportunities: Array of 3-5 business opportunities
-            - competitors: Array of objects with the following fields:
-              - name: Competitor company name
-              - marketShare: Estimated market share percentage
-              - strengths: String listing key strengths of this competitor
-              - weaknesses: String listing key weaknesses of this competitor
-            - tariffImpact: Object with fields:
-              - exposure: High/Medium/Low exposure to international tariffs
-              - regions: Array of affected regions (e.g., ["China", "EU", "Mexico"])
-              - impact: Brief explanation of how tariffs might impact their operations/costs
-              - mitigationStrategies: Array of 2-3 strategies they might employ to mitigate tariff impacts
-            - salesforceRecommendations: Object with fields:
-              - productFit: Array of 2-3 Salesforce products that would address their needs
-              - valueProposition: How Salesforce specifically addresses their industry challenges
-              - implementationConsiderations: Array of 2-3 key considerations for implementation
-              - roi: Brief explanation of potential ROI from Salesforce implementation
-            - discoveryQuestions: Object with fields:
-              - currentChallenges: Array of 3-4 specific questions tailored to this company's challenges
-              - goalsAndObjectives: Array of 3-4 specific questions related to this company's goals
-              - decisionProcess: Array of 3-4 specific questions about their decision-making process
-              - budgetAndResources: Array of 3-4 specific questions about budget and resources`
+            content: systemMessage
           },
           {
             role: 'user',
-            content: `Please provide detailed information about ${query}, including company profile, market position, challenges, opportunities, competitive analysis, tariff impact analysis, and how Salesforce products would specifically address their business challenges. Be specific to this company and include real-world competitors, recent trends, and industry-specific insights.`
+            content: purpose === 'account_tiering' 
+              ? `Please analyze this account for sales tiering: ${query}`
+              : `Please provide detailed information about ${query}, including company profile, market position, challenges, opportunities, competitive analysis, tariff impact analysis, and how Salesforce products would specifically address their business challenges. Be specific to this company and include real-world competitors, recent trends, and industry-specific insights.`
           }
         ],
         temperature: 0.7

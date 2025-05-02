@@ -7,6 +7,7 @@ import BattlecardGenerator from './battlecard-generator.js';
 import MeetingPrepToolkit from './meeting-prep-toolkit.js';
 import SalesPotentialScore from './sales-potential-score.js';
 import ActionRecommendations from './action-recommendations.js';
+import AccountTieringModule from './account-tiering-module.js';
 
 class SalesModulesIntegration {
     constructor() {
@@ -16,7 +17,8 @@ class SalesModulesIntegration {
             battlecard: new BattlecardGenerator(),
             meetingPrep: new MeetingPrepToolkit(),
             salesPotential: new SalesPotentialScore(),
-            actionRecommendations: new ActionRecommendations()
+            actionRecommendations: new ActionRecommendations(),
+            accountTiering: new AccountTieringModule()
         };
         
         this.companyData = null;
@@ -43,7 +45,8 @@ class SalesModulesIntegration {
             // First, initialize basic company info modules
             await Promise.all([
                 this.modules.buyerSignals.initialize(companyName),
-                this.modules.accountIntelligence.initialize(companyName, companyData)
+                this.modules.accountIntelligence.initialize(companyName, companyData),
+                this.modules.accountTiering.initialize() // Account Tiering doesn't need company data initially
             ]);
             
             // Initialize battlecard and meeting prep toolkit
@@ -105,6 +108,7 @@ class SalesModulesIntegration {
             const newTabs = [
                 { id: 'buyer-signals', label: 'Buyer Signals', icon: 'ri-radar-line' },
                 { id: 'account-intelligence', label: 'Account Intelligence', icon: 'ri-building-4-line' },
+                { id: 'account-tiering', label: 'Account Tiering', icon: 'ri-bar-chart-grouped-line' },
                 { id: 'battlecard', label: 'Battlecard', icon: 'ri-file-list-3-line' },
                 { id: 'meeting-prep', label: 'Meeting Prep', icon: 'ri-calendar-check-line' },
                 { id: 'sales-potential', label: 'Sales Potential', icon: 'ri-line-chart-line' },
