@@ -1,8 +1,11 @@
 // Account Tiering Module
 // This module allows users to upload CSV files and tier accounts based on weighted criteria
 
+console.log('Debug: account-tiering-module.js loaded');
+
 class AccountTieringModule {
     constructor() {
+        console.log('Debug: AccountTieringModule constructor called');
         this.apiBaseUrl = 'http://localhost:3001'; // Adjust based on server configuration
         this.accounts = [];
         this.criteria = this.getDefaultCriteria();

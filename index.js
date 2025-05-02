@@ -38,4 +38,38 @@ window.addEventListener('load', () => {
                 });
         }
     }
+});
+
+console.log('Debug: index.js loaded');
+
+// Check if Account Tiering module is available
+try {
+  if (typeof AccountTieringModule !== 'undefined') {
+    console.log('Debug: AccountTieringModule is defined');
+  } else {
+    console.log('Debug: AccountTieringModule is NOT defined');
+  }
+} catch (e) {
+  console.error('Debug: Error checking AccountTieringModule', e);
+}
+
+// For SalesModulesIntegration
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('Debug: DOMContentLoaded fired');
+  
+  // Check if the Account Tiering tab is present
+  const accountTieringTab = document.querySelector('[data-tab="account-tiering"]');
+  console.log('Debug: Account Tiering tab found:', !!accountTieringTab);
+  
+  // Check if SalesModulesIntegration includes Account Tiering
+  try {
+    if (window.salesModules && window.salesModules.modules) {
+      console.log('Debug: Sales modules loaded:', Object.keys(window.salesModules.modules));
+      console.log('Debug: Account Tiering module exists:', !!window.salesModules.modules.accountTiering);
+    } else {
+      console.log('Debug: Sales modules not initialized yet');
+    }
+  } catch (e) {
+    console.error('Debug: Error checking sales modules', e);
+  }
 }); 
