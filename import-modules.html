@@ -5,4 +5,22 @@
 <script type="module" src="./account-tiering-module.js"></script>
 <script type="module" src="./index.js"></script>
 <script src="./update-html.js"></script>
+<script>
+    console.log('Debug: import-modules.html loaded');
+    
+    // Check if stylesheets are loaded correctly
+    document.addEventListener('DOMContentLoaded', () => {
+        const styleSheets = Array.from(document.styleSheets);
+        console.log('Debug: Loaded stylesheets:', styleSheets.map(s => s.href || 'inline stylesheet'));
+        
+        // Check if account-tiering-styles.css is included through module-styles.css
+        fetch('./module-styles.css')
+            .then(response => response.text())
+            .then(css => {
+                console.log('Debug: module-styles.css contains account-tiering-styles.css:', 
+                    css.includes('account-tiering-styles.css'));
+            })
+            .catch(error => console.error('Debug: Error fetching module-styles.css:', error));
+    });
+</script>
 <!-- End of Sales Meeting AI Enhanced Features --> 
