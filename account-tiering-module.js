@@ -111,21 +111,90 @@ class AccountTieringModule {
                     <h2>CSV-Based Account Tiering Tool</h2>
                     <div class="section">
                         <h3><i class="ri-file-upload-line"></i> Upload Account Data</h3>
+                        <p class="section-description">Upload your CSV file containing account data to begin tiering your accounts. The system will analyze the data and categorize accounts into tiers based on your criteria.</p>
                         <div class="csv-upload-container">
                             <div class="csv-dropzone" id="csv-dropzone">
                                 <i class="ri-upload-cloud-2-line"></i>
                                 <p>Drag & drop your CSV file here or <span class="browse-link">browse</span></p>
-                                <p class="file-hint">Include columns for: company name, URL, country, address, and any other data</p>
+                                <p class="file-hint">Include columns for: company name, URL, country, address, industry, and any other relevant data</p>
                                 <input type="file" id="csv-file-input" accept=".csv" style="display: none;" />
                             </div>
                             <div class="csv-preview" id="csv-preview" style="display: none;">
                                 <div class="csv-preview-header">
-                                    <h4>File Preview</h4>
+                                    <h4><i class="ri-file-list-3-line"></i> File Preview</h4>
                                     <button class="csv-preview-close" id="csv-preview-close">
                                         <i class="ri-close-line"></i>
                                     </button>
                                 </div>
                                 <div class="csv-preview-content" id="csv-preview-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-features">
+                        <h3><i class="ri-information-line"></i> Key Features</h3>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <div class="feature-icon"><i class="ri-upload-cloud-line"></i></div>
+                                <div class="feature-content">
+                                    <h4>Easy CSV Upload</h4>
+                                    <p>Drag & drop or browse to upload your account data in CSV format</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon"><i class="ri-scales-3-line"></i></div>
+                                <div class="feature-content">
+                                    <h4>Customizable Criteria</h4>
+                                    <p>Adjust weights for different factors to match your business priorities</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon"><i class="ri-ai-generate"></i></div>
+                                <div class="feature-content">
+                                    <h4>AI Enrichment</h4>
+                                    <p>Enhance your account data with AI-powered insights and analysis</p>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon"><i class="ri-bar-chart-grouped-line"></i></div>
+                                <div class="feature-content">
+                                    <h4>Visual Results</h4>
+                                    <p>View tiered accounts in an intuitive interface with detailed insights</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>How It Works</h2>
+                    <div class="how-it-works">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Upload CSV</h4>
+                                <p>Upload your accounts data in CSV format. Include as much information as possible for better results.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Configure Criteria</h4>
+                                <p>Set weights for each tiering criterion based on your business priorities.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Review Results</h4>
+                                <p>View accounts categorized into 4 tiers with detailed insights and ability to adjust.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Export & Action</h4>
+                                <p>Export the tiered accounts for use in your sales strategy or CRM system.</p>
                             </div>
                         </div>
                     </div>
@@ -324,19 +393,36 @@ class AccountTieringModule {
         // Change the card
         tieringContainer.innerHTML = `
             <div class="card">
-                <h2>Account Tiering Criteria</h2>
+                <h2>Configure Account Tiering Criteria</h2>
                 <div class="section">
-                    <h3><i class="ri-scales-3-line"></i> Configure Tiering Criteria</h3>
-                    <p>Adjust the weights of each criterion to determine how accounts will be tiered. 
-                       Total weight should equal 100%.</p>
+                    <div class="criteria-header">
+                        <div class="criteria-info">
+                            <h3><i class="ri-scales-3-line"></i> Weighted Criteria Configuration</h3>
+                            <p class="section-description">
+                                Customize how your accounts will be tiered by adjusting the importance (weight) of each criterion. 
+                                The combined weights should equal 100%.
+                            </p>
+                        </div>
+                        <div class="criteria-progress">
+                            <div class="progress-ring" data-percentage="${this.calculateTotalWeight()}">
+                                <div class="progress-circle">
+                                    <span id="total-weight-display">${this.calculateTotalWeight()}%</span>
+                                </div>
+                            </div>
+                            <div class="progress-label">Total Weight</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-alert">
+                        <i class="ri-information-line"></i>
+                        <div>
+                            <p><strong>How this works:</strong> Each criterion contributes to the final tier score based on its weight. Higher scores will place accounts in higher tiers.</p>
+                            <p>Check or uncheck criteria to include or exclude them, and adjust their weights to match your business priorities.</p>
+                        </div>
+                    </div>
                     
                     <div class="criteria-list" id="criteria-list">
                         ${this.renderCriteriaList()}
-                    </div>
-                    
-                    <div class="weight-total">
-                        <span>Total Weight:</span>
-                        <span id="total-weight-display">${this.calculateTotalWeight()}%</span>
                     </div>
                     
                     <div class="buttons-row">
@@ -349,10 +435,52 @@ class AccountTieringModule {
                     </div>
                 </div>
             </div>
+            
+            <div class="card">
+                <h2>Account Tiers Explanation</h2>
+                <div class="tiers-explanation">
+                    ${this.tiers.map(tier => `
+                        <div class="tier-explanation" style="border-left-color: ${tier.color}">
+                            <div class="tier-explanation-header">
+                                <h4>${tier.name}</h4>
+                                <span class="tier-badge" style="background-color: ${tier.color}">${tier.name}</span>
+                            </div>
+                            <p>${tier.description}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
         `;
 
         // Add event listeners
         this.setupCriteriaEventListeners();
+        
+        // Update progress ring
+        this.updateProgressRing(this.calculateTotalWeight());
+    }
+    
+    // Update the progress ring based on the total weight
+    updateProgressRing(percentage) {
+        const ring = document.querySelector('.progress-ring');
+        if (!ring) return;
+        
+        // Update the ring color based on percentage
+        if (percentage === 100) {
+            ring.style.setProperty('--progress-color', '#10b981'); // Green for 100%
+        } else if (percentage > 85) {
+            ring.style.setProperty('--progress-color', '#f59e0b'); // Orange for close
+        } else {
+            ring.style.setProperty('--progress-color', '#ef4444'); // Red for too low
+        }
+        
+        // Update the ring progress
+        ring.style.setProperty('--progress', percentage);
+        
+        // Update the display text
+        const display = document.getElementById('total-weight-display');
+        if (display) {
+            display.textContent = `${percentage}%`;
+        }
     }
 
     // Render the criteria list
@@ -425,7 +553,7 @@ class AccountTieringModule {
                 }
                 
                 // Update total weight display
-                document.getElementById('total-weight-display').textContent = `${this.calculateTotalWeight()}%`;
+                this.updateProgressRing(this.calculateTotalWeight());
             });
             
             // Update weight on input change
@@ -434,7 +562,7 @@ class AccountTieringModule {
                 this.criteria[criterionIndex].weight = parseInt(e.target.value) || 0;
                 
                 // Update total weight display
-                document.getElementById('total-weight-display').textContent = `${this.calculateTotalWeight()}%`;
+                this.updateProgressRing(this.calculateTotalWeight());
             });
         });
     }
@@ -533,18 +661,23 @@ class AccountTieringModule {
     // Enrich account data using OpenAI
     async enrichAccountData(account) {
         try {
-            // Get the OpenAI API key
-            // This assumes the apiBaseUrl points to your server with OpenAI integration
-            const response = await fetch(`${this.apiBaseUrl}/api/openai`, {
+            // Prepare the account data
+            const accountData = {
+                name: account.companyName || account.company || 'Unknown Company',
+                url: account.url || account.website || '',
+                industry: account.industry || '',
+                location: account.country || account.location || '',
+                address: account.address || ''
+            };
+            
+            // Call the account enrichment endpoint
+            const response = await fetch(`${this.apiBaseUrl}/api/accounts/enrich`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    query: `Analyze and enrich this account for sales tiering: ${account.companyName || account.company || 'Unknown Company'}, 
-                    URL: ${account.url || account.website || 'Unknown'}, 
-                    Location: ${account.country || account.location || 'Unknown'}, 
-                    Address: ${account.address || 'Unknown'}`
+                    account: accountData
                 })
             });
             
@@ -554,45 +687,16 @@ class AccountTieringModule {
             
             const data = await response.json();
             
-            // Extract the enrichment data from OpenAI response
-            const enrichment = data.choices[0].message.content;
-            
-            // Parse the enrichment JSON if it's a string
-            let enrichmentData;
-            try {
-                if (typeof enrichment === 'string') {
-                    // Try to extract JSON from the response
-                    const jsonMatch = enrichment.match(/({[\s\S]*})/);
-                    if (jsonMatch) {
-                        enrichmentData = JSON.parse(jsonMatch[0]);
-                    } else {
-                        throw new Error('Invalid enrichment format');
-                    }
-                } else if (typeof enrichment === 'object') {
-                    enrichmentData = enrichment;
-                } else {
-                    throw new Error('Invalid enrichment format');
-                }
-            } catch (jsonError) {
-                console.error('Error parsing enrichment data:', jsonError);
-                enrichmentData = {
-                    employees: 'Unknown',
-                    revenue: 'Unknown',
-                    industryGrowth: 'Unknown',
-                    govInvestment: 'Unknown',
-                    businessActivity: 'Unknown',
-                    hiringTrends: 'Unknown',
-                    techAdoption: 'Unknown',
-                    tariffExposure: 'Unknown'
+            // If the enrichment was successful, combine with original account
+            if (data.success && data.account) {
+                return {
+                    ...account,
+                    ...data.account,
+                    enriched: true
                 };
+            } else {
+                throw new Error('Invalid enrichment response');
             }
-            
-            // Combine original account data with enrichment
-            return {
-                ...account,
-                ...enrichmentData,
-                enriched: true
-            };
         } catch (error) {
             console.error('Error enriching account:', error);
             
@@ -737,29 +841,45 @@ class AccountTieringModule {
 
         // Render tiered accounts view
         tieringContainer.innerHTML = `
-            <div class="card">
-                <h2>Account Tiering Results</h2>
-                <div class="section">
-                    <div class="tier-summary">
-                        <div class="tier-chart" id="tier-chart"></div>
-                        <div class="tier-stats">
-                            ${accountsByTier.map(tierGroup => `
-                                <div class="tier-stat" style="border-left: 4px solid ${tierGroup.tier.color}">
-                                    <div class="tier-name">${tierGroup.tier.name}</div>
-                                    <div class="tier-count">${tierGroup.accounts.length}</div>
-                                    <div class="tier-percent">${Math.round((tierGroup.accounts.length / tieredAccounts.length) * 100)}%</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    
-                    <div class="tier-actions">
+            <div class="card results-card">
+                <div class="results-header">
+                    <h2>Account Tiering Results</h2>
+                    <div class="results-actions">
                         <button class="button secondary" id="edit-criteria-btn">
-                            <i class="ri-edit-line"></i> Edit Criteria
+                            <i class="ri-settings-4-line"></i> Edit Criteria
                         </button>
                         <button class="button primary" id="export-results-btn">
                             <i class="ri-download-line"></i> Export Results
                         </button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="results-overview">
+                        <div class="tier-chart-container">
+                            <h3><i class="ri-pie-chart-line"></i> Distribution</h3>
+                            <div class="tier-chart" id="tier-chart"></div>
+                        </div>
+                        <div class="tier-stats-container">
+                            <h3><i class="ri-bar-chart-grouped-line"></i> Tier Summary</h3>
+                            <div class="tier-stats">
+                                ${accountsByTier.map(tierGroup => `
+                                    <div class="tier-stat" style="border-left: 4px solid ${tierGroup.tier.color}">
+                                        <div class="tier-stat-header">
+                                            <div class="tier-name">${tierGroup.tier.name}</div>
+                                            <div class="tier-dot" style="background-color: ${tierGroup.tier.color}"></div>
+                                        </div>
+                                        <div class="tier-count">${tierGroup.accounts.length}</div>
+                                        <div class="tier-info">
+                                            <div class="tier-percent">${Math.round((tierGroup.accounts.length / tieredAccounts.length) * 100)}%</div>
+                                            <div class="tier-actions-mini">
+                                                <button class="view-tier-btn" data-tier="${tierGroup.tier.id}">View</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -769,7 +889,7 @@ class AccountTieringModule {
                             <div class="tier-tab-header ${index === 0 ? 'active' : ''}" 
                                 data-tier="${tierGroup.tier.id}" 
                                 style="border-top: 3px solid ${tierGroup.tier.color}">
-                                ${tierGroup.tier.name} (${tierGroup.accounts.length})
+                                ${tierGroup.tier.name} <span class="tier-counter">${tierGroup.accounts.length}</span>
                             </div>
                         `).join('')}
                     </div>
@@ -778,11 +898,12 @@ class AccountTieringModule {
                         ${accountsByTier.map((tierGroup, index) => `
                             <div class="tier-tab-content ${index === 0 ? 'active' : ''}" 
                                 data-tier="${tierGroup.tier.id}">
-                                <div class="tier-description">
+                                <div class="tier-description" style="border-left-color: ${tierGroup.tier.color}">
+                                    <i class="ri-information-line"></i>
                                     ${tierGroup.tier.description}
                                 </div>
                                 <div class="accounts-table-container">
-                                    ${this.renderAccountsTable(tierGroup.accounts)}
+                                    ${this.renderAccountsTable(tierGroup.accounts, tierGroup.tier)}
                                 </div>
                             </div>
                         `).join('')}
@@ -799,14 +920,10 @@ class AccountTieringModule {
     }
 
     // Render the accounts table
-    renderAccountsTable(accounts) {
+    renderAccountsTable(accounts, tier) {
         if (accounts.length === 0) {
             return `<div class="no-accounts">No accounts in this tier</div>`;
         }
-
-        // Get all the keys from the first account
-        const keys = Object.keys(accounts[0])
-            .filter(key => !['tier', 'tierScore', 'enriched', 'enrichmentError', 'errorMessage'].includes(key));
 
         return `
             <table class="accounts-table">
@@ -814,32 +931,95 @@ class AccountTieringModule {
                     <tr>
                         <th>Company Name</th>
                         <th>Tier Score</th>
+                        <th>Key Factors</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${accounts.map(account => `
                         <tr>
-                            <td>${account.companyName || account.company || 'Unknown'}</td>
+                            <td>
+                                <div class="account-name-cell">
+                                    <div class="account-icon" style="background-color: ${tier.color}">
+                                        ${this.getInitials(account.companyName || account.company || 'Unknown')}
+                                    </div>
+                                    <div>${account.companyName || account.company || 'Unknown'}</div>
+                                </div>
+                            </td>
                             <td>
                                 <div class="score-bar">
-                                    <div class="score-fill" style="width: ${account.tierScore}%; background-color: ${account.tier.color}"></div>
+                                    <div class="score-fill" style="width: ${account.tierScore}%; background-color: ${tier.color}"></div>
                                     <span>${account.tierScore}</span>
                                 </div>
                             </td>
                             <td>
-                                <button class="button small view-btn" data-company="${account.companyName || account.company || 'Unknown'}">
-                                    <i class="ri-eye-line"></i>
-                                </button>
-                                <button class="button small edit-tier-btn" data-company="${account.companyName || account.company || 'Unknown'}">
-                                    <i class="ri-edit-line"></i>
-                                </button>
+                                <div class="key-factors">
+                                    ${this.getTopFactors(account)}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="button small view-btn" data-company="${account.companyName || account.company || 'Unknown'}">
+                                        <i class="ri-eye-line"></i>
+                                    </button>
+                                    <button class="button small edit-tier-btn" data-company="${account.companyName || account.company || 'Unknown'}">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
         `;
+    }
+
+    // Get initials from company name
+    getInitials(name) {
+        return name
+            .split(' ')
+            .map(word => word.charAt(0))
+            .join('')
+            .substring(0, 2)
+            .toUpperCase();
+    }
+
+    // Get top factors that contributed to the tier score
+    getTopFactors(account) {
+        // Find the top 2 weighted criteria that have high values
+        const topFactors = this.criteria
+            .filter(criterion => criterion.enabled)
+            .map(criterion => {
+                const value = account[criterion.id];
+                // Convert value to a numeric score if possible
+                let score = 0;
+                if (typeof value === 'number') {
+                    score = value;
+                } else if (typeof value === 'string') {
+                    if (value === 'High' || value === 'Strong' || value === 'Positive') {
+                        score = 10;
+                    } else if (value === 'Medium' || value === 'Moderate' || value === 'Neutral') {
+                        score = 6;
+                    } else if (value === 'Low' || value === 'Weak' || value === 'Negative') {
+                        score = 3;
+                    }
+                }
+                return {
+                    name: criterion.name,
+                    score: score,
+                    weight: criterion.weight
+                };
+            })
+            .sort((a, b) => (b.score * b.weight) - (a.score * a.weight))
+            .slice(0, 2);
+
+        if (topFactors.length === 0) {
+            return '<span class="no-factors">No key factors</span>';
+        }
+
+        return topFactors.map(factor => 
+            `<span class="factor">${factor.name}</span>`
+        ).join('');
     }
 
     // Set up event listeners for tiered accounts view
@@ -855,6 +1035,20 @@ class AccountTieringModule {
                 const tierId = header.getAttribute('data-tier');
                 header.classList.add('active');
                 document.querySelector(`.tier-tab-content[data-tier="${tierId}"]`).classList.add('active');
+            });
+        });
+
+        // Quick view tier buttons
+        document.querySelectorAll('.view-tier-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const tierId = button.getAttribute('data-tier');
+                // Find the corresponding tab header and trigger a click
+                const header = document.querySelector(`.tier-tab-header[data-tier="${tierId}"]`);
+                if (header) {
+                    header.click();
+                    // Scroll to the tier tabs
+                    document.querySelector('.tier-tabs').scrollIntoView({ behavior: 'smooth' });
+                }
             });
         });
 
@@ -900,26 +1094,109 @@ class AccountTieringModule {
         const chartContainer = document.getElementById('tier-chart');
         if (!chartContainer) return;
 
-        // Simple chart implementation (can be replaced with a proper chart library)
         const totalAccounts = accountsByTier.reduce((sum, tierGroup) => sum + tierGroup.accounts.length, 0);
         
+        // Calculate starting angles for each slice
+        let startAngle = 0;
+        const chartData = accountsByTier.map((tierGroup, index) => {
+            const percentage = (tierGroup.accounts.length / totalAccounts) * 100;
+            const angle = (percentage / 100) * 360;
+            const data = {
+                tierName: tierGroup.tier.name,
+                count: tierGroup.accounts.length,
+                percentage: percentage,
+                color: tierGroup.tier.color,
+                startAngle: startAngle,
+                endAngle: startAngle + angle
+            };
+            startAngle += angle;
+            return data;
+        });
+        
+        // Create the SVG for the chart
         let html = `
-            <div class="pie-chart">
-                ${accountsByTier.map((tierGroup, index) => {
-                    const percentage = (tierGroup.accounts.length / totalAccounts) * 100;
-                    return `
-                        <div class="pie-slice" style="
-                            --percentage: ${percentage};
-                            --color: ${tierGroup.tier.color};
-                            --index: ${index};
-                        "></div>
-                    `;
-                }).join('')}
-                <div class="pie-label">${totalAccounts}<br>Accounts</div>
+            <div class="pie-chart-wrapper">
+                <svg viewBox="0 0 100 100" class="pie-chart-svg">
+                    <circle cx="50" cy="50" r="45" fill="#f1f5f9" />
+                    ${chartData.map(slice => {
+                        // Skip slices with 0 percentage
+                        if (slice.percentage === 0) return '';
+                        
+                        // Calculate the SVG arc path
+                        const startX = 50 + 45 * Math.cos((slice.startAngle - 90) * Math.PI / 180);
+                        const startY = 50 + 45 * Math.sin((slice.startAngle - 90) * Math.PI / 180);
+                        const endX = 50 + 45 * Math.cos((slice.endAngle - 90) * Math.PI / 180);
+                        const endY = 50 + 45 * Math.sin((slice.endAngle - 90) * Math.PI / 180);
+                        
+                        // Determine if the slice is more than half the circle
+                        const largeArcFlag = slice.endAngle - slice.startAngle > 180 ? 1 : 0;
+                        
+                        return `
+                            <path 
+                                d="M 50 50 L ${startX} ${startY} A 45 45 0 ${largeArcFlag} 1 ${endX} ${endY} Z" 
+                                fill="${slice.color}" 
+                                stroke="#fff" 
+                                stroke-width="1"
+                                data-tier="${slice.tierName}"
+                                class="chart-slice"
+                            />
+                        `;
+                    }).join('')}
+                    <circle cx="50" cy="50" r="20" fill="white" stroke="#e2e8f0" stroke-width="1" />
+                    <text x="50" y="46" font-size="8" text-anchor="middle" font-weight="bold">${totalAccounts}</text>
+                    <text x="50" y="56" font-size="5" text-anchor="middle">Accounts</text>
+                </svg>
+                
+                <div class="chart-legend">
+                    ${chartData.map(slice => `
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: ${slice.color}"></div>
+                            <div class="legend-text">
+                                <span class="legend-name">${slice.tierName}</span>
+                                <span class="legend-value">${slice.count} (${Math.round(slice.percentage)}%)</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
         `;
         
         chartContainer.innerHTML = html;
+        
+        // Add hover interactions
+        document.querySelectorAll('.chart-slice').forEach(slice => {
+            slice.addEventListener('mouseenter', () => {
+                // Highlight the corresponding legend item
+                const tierName = slice.getAttribute('data-tier');
+                document.querySelector(`.legend-item:nth-child(${chartData.findIndex(d => d.tierName === tierName) + 1})`).classList.add('active');
+                // Push the slice slightly out
+                const cx = 50, cy = 50;
+                const centroid = this.getArcCentroid(slice);
+                const dx = centroid.x - cx;
+                const dy = centroid.y - cy;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const offset = 3; // How far to push
+                
+                slice.style.transform = `translate(${dx/distance * offset}px, ${dy/distance * offset}px)`;
+            });
+            
+            slice.addEventListener('mouseleave', () => {
+                // Remove highlight
+                document.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
+                // Reset position
+                slice.style.transform = 'translate(0, 0)';
+            });
+        });
+    }
+    
+    // Helper method to get the centroid of an SVG arc path
+    getArcCentroid(path) {
+        // Simple approximation by getting the middle point of the arc
+        const bbox = path.getBBox();
+        return {
+            x: bbox.x + bbox.width / 2,
+            y: bbox.y + bbox.height / 2
+        };
     }
 
     // View account details

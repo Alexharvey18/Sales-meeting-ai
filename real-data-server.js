@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
 import path from 'path';
+import { OpenAI } from 'openai';
 
 // Load environment variables
 dotenv.config();
@@ -1111,6 +1112,110 @@ app.get('/api/priorities', async (req, res) => {
         }
       ],
       lastUpdated: new Date().toISOString()
+    });
+  }
+});
+
+// Add Account Enrichment API endpoint for the Account Tiering module
+app.post('/api/accounts/enrich', async (req, res) => {
+  try {
+    const { account } = req.body;
+    
+    if (!account || !account.name) {
+      return res.status(400).json({ error: 'Account data with company name is required' });
+    }
+    
+    console.log(`Enriching account data for: ${account.name}`);
+    
+    // If OpenAI API key is available, use it for enrichment
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        const openai = new OpenAI({
+          apiKey: process.env.OPENAI_API_KEY
+        });
+        
+        const companyInfo = `Company Name: ${account.name}
+URL: ${account.url || 'N/A'}
+Industry: ${account.industry || 'Unknown'}
+Location: ${account.location || account.address || 'Unknown'}`;
+        
+        const response = await openai.chat.completions.create({
+          model: "gpt-4",
+          messages: [
+            {
+              role: "system",
+              content: "You are an AI business analyst helping to enrich data for an account tiering system. Provide enriched business data for the company in JSON format with the following properties: employees (estimated count as number), revenue (estimated in millions USD as number), industryGrowth (1-10 scale), govInvestment (1-10 scale), businessActivity (1-10 scale), hiringTrends (1-10 scale), techAdoption (1-10 scale), tariffExposure (1-10 scale). Return ONLY valid JSON, no explanation."
+            },
+            {
+              role: "user",
+              content: `Based on the following information about a company, provide enriched data for account tiering:\n\n${companyInfo}`
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 500
+        });
+        
+        const enrichmentText = response.choices[0].message.content.trim();
+        
+        try {
+          // Extract JSON from the response
+          const jsonMatch = enrichmentText.match(/\{[\s\S]*\}/);
+          const enrichedData = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+          
+          if (enrichedData) {
+            // Merge the enriched data with the original account
+            const mergedAccount = {
+              ...account,
+              ...enrichedData,
+              enrichmentSource: "AI analysis"
+            };
+            
+            return res.json({ 
+              account: mergedAccount,
+              success: true 
+            });
+          } else {
+            throw new Error("Failed to parse enrichment response");
+          }
+        } catch (parseError) {
+          console.error("JSON parsing error:", parseError);
+          throw new Error("Failed to process enrichment data");
+        }
+      } catch (aiError) {
+        console.error("AI enrichment error:", aiError);
+        throw new Error("AI enrichment failed");
+      }
+    }
+    
+    // Fallback mock enrichment if OpenAI is not available
+    const mockEnrichment = {
+      employees: Math.floor(Math.random() * 10000) + 50,
+      revenue: Math.floor(Math.random() * 900) + 100,
+      industryGrowth: Math.floor(Math.random() * 10) + 1,
+      govInvestment: Math.floor(Math.random() * 10) + 1,
+      businessActivity: Math.floor(Math.random() * 10) + 1,
+      hiringTrends: Math.floor(Math.random() * 10) + 1,
+      techAdoption: Math.floor(Math.random() * 10) + 1,
+      tariffExposure: Math.floor(Math.random() * 10) + 1,
+      enrichmentSource: "Mock data"
+    };
+    
+    // Merge the mock enrichment with the original account
+    const mergedAccount = {
+      ...account,
+      ...mockEnrichment
+    };
+    
+    res.json({ 
+      account: mergedAccount,
+      success: true 
+    });
+    
+  } catch (error) {
+    console.error('Account enrichment error:', error);
+    res.status(500).json({ 
+      error: 'Failed to enrich account data',
+      details: error.message
     });
   }
 });
