@@ -21,7 +21,13 @@ const filesToInclude = [
   'environment-setup.js',
   'package-prod.json',
   'src',
-  'index-standalone.html'
+  'index-standalone.html',
+  'account-tiering-module.js',
+  'account-tiering-styles.css',
+  'module-styles.css',
+  'sales-modules-integration.js',
+  'index.js',
+  'import-modules.html'
 ];
 
 // Create a tmp directory for ZIP preparation
