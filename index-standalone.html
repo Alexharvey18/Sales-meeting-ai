@@ -833,9 +833,146 @@
                 <div id="account-tiering-tab" class="tab-content">
                     <div class="card p-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Account Tiering</h3>
-                        <div id="account-tiering-content"></div>
+                        <div id="account-tiering-content">
+                            <div class="account-tiering-container">
+                                <div class="card">
+                                    <h2>CSV-Based Account Tiering Tool</h2>
+                                    <div class="section">
+                                        <h3><i class="ri-file-upload-line"></i> Upload Account Data</h3>
+                                        <p class="section-description">Upload your CSV file containing account data to begin tiering your accounts. The system will analyze the data and categorize accounts into tiers based on your criteria.</p>
+                                        <div class="csv-upload-container">
+                                            <div class="csv-dropzone" id="csv-dropzone">
+                                                <i class="ri-upload-cloud-2-line"></i>
+                                                <p>Drag & drop your CSV file here or <span class="browse-link">browse</span></p>
+                                                <p class="file-hint">Include columns for: company name, URL, country, address, industry, and any other relevant data</p>
+                                                <input type="file" id="csv-file-input" accept=".csv" style="display: none;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="tool-features">
+                                        <h3><i class="ri-information-line"></i> Key Features</h3>
+                                        <div class="features-grid">
+                                            <div class="feature-item">
+                                                <div class="feature-icon"><i class="ri-upload-cloud-line"></i></div>
+                                                <div class="feature-content">
+                                                    <h4>Easy CSV Upload</h4>
+                                                    <p>Drag & drop or browse to upload your account data in CSV format</p>
+                                                </div>
+                                            </div>
+                                            <div class="feature-item">
+                                                <div class="feature-icon"><i class="ri-scales-3-line"></i></div>
+                                                <div class="feature-content">
+                                                    <h4>Customizable Criteria</h4>
+                                                    <p>Adjust weights for different factors to match your business priorities</p>
+                                                </div>
+                                            </div>
+                                            <div class="feature-item">
+                                                <div class="feature-icon"><i class="ri-ai-generate"></i></div>
+                                                <div class="feature-content">
+                                                    <h4>AI Enrichment</h4>
+                                                    <p>Enhance your account data with AI-powered insights and analysis</p>
+                                                </div>
+                                            </div>
+                                            <div class="feature-item">
+                                                <div class="feature-icon"><i class="ri-bar-chart-grouped-line"></i></div>
+                                                <div class="feature-content">
+                                                    <h4>Visual Results</h4>
+                                                    <p>View tiered accounts in an intuitive interface with detailed insights</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card">
+                                    <h2>How It Works</h2>
+                                    <div class="how-it-works">
+                                        <div class="step">
+                                            <div class="step-number">1</div>
+                                            <div class="step-content">
+                                                <h4>Upload CSV</h4>
+                                                <p>Upload your accounts data in CSV format. Include as much information as possible for better results.</p>
+                                            </div>
+                                        </div>
+                                        <div class="step">
+                                            <div class="step-number">2</div>
+                                            <div class="step-content">
+                                                <h4>Configure Criteria</h4>
+                                                <p>Set weights for each tiering criterion based on your business priorities.</p>
+                                            </div>
+                                        </div>
+                                        <div class="step">
+                                            <div class="step-number">3</div>
+                                            <div class="step-content">
+                                                <h4>Review Results</h4>
+                                                <p>View accounts categorized into 4 tiers with detailed insights and ability to adjust.</p>
+                                            </div>
+                                        </div>
+                                        <div class="step">
+                                            <div class="step-number">4</div>
+                                            <div class="step-content">
+                                                <h4>Export & Action</h4>
+                                                <p>Export the tiered accounts for use in your sales strategy or CRM system.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <script>
+                    // Initialize AccountTieringModule when the page loads
+                    document.addEventListener('DOMContentLoaded', () => {
+                        console.log('Initializing AccountTieringModule in standalone mode');
+                        // Make sure AccountTieringModule is loaded
+                        if (typeof AccountTieringModule !== 'undefined') {
+                            try {
+                                const accountTieringModule = new AccountTieringModule();
+                                // Set up the file input and dropzone events
+                                const fileInput = document.getElementById('csv-file-input');
+                                const dropzone = document.getElementById('csv-dropzone');
+                                const browseLink = document.querySelector('.browse-link');
+                                
+                                if (fileInput && dropzone && browseLink) {
+                                    // Click on browse link
+                                    browseLink.addEventListener('click', () => {
+                                        fileInput.click();
+                                    });
+                                    
+                                    // File input change
+                                    fileInput.addEventListener('change', (e) => {
+                                        if (e.target.files.length > 0) {
+                                            console.log('File selected:', e.target.files[0].name);
+                                        }
+                                    });
+                                    
+                                    // Drag and drop events
+                                    dropzone.addEventListener('dragover', (e) => {
+                                        e.preventDefault();
+                                        dropzone.classList.add('active');
+                                    });
+                                    
+                                    dropzone.addEventListener('dragleave', () => {
+                                        dropzone.classList.remove('active');
+                                    });
+                                    
+                                    dropzone.addEventListener('drop', (e) => {
+                                        e.preventDefault();
+                                        dropzone.classList.remove('active');
+                                        console.log('File dropped');
+                                    });
+                                }
+                                console.log('AccountTieringModule initialization complete');
+                            } catch (error) {
+                                console.error('Error initializing AccountTieringModule:', error);
+                            }
+                        } else {
+                            console.error('AccountTieringModule is not defined');
+                        }
+                    });
+                </script>
             </div>
 
             <!-- Welcome Screen (initial view) -->
